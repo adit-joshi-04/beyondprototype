@@ -34,6 +34,13 @@
     });
   });
 
+  const leftPanel = split.querySelector('.sp-left');
+  leftPanel.addEventListener('click', () => {
+    if (!split.classList.contains('hover-left')) return;
+    const root = window.location.pathname.replace(/\/[^/]+$/, '');
+    window.location.href = root + '../projects page/fifth ave/index.html';
+  });
+
   split.addEventListener('pointerleave', () => {
     split.classList.remove('hover-left', 'hover-right');
     resetX();

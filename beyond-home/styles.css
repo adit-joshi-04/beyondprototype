@@ -227,6 +227,8 @@ a { color: inherit; }
 }
 
 /* Fade out the receding panel's text when the other side is hovered */
+.split.hover-left .sp-left { cursor: pointer; }
+
 .split.hover-left .sp-right-shift,
 .split.hover-left .sp-explore-right,
 .split.hover-left .sp-status   { opacity: 0; }
