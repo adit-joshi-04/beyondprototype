@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fifth Ave</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<!-- GSAP + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #d2d2d2;
+            color: #0f0f0f;
+            overflow: hidden; /* page is a fixed viewport — wheel events drive all transitions */
+        }
+
+        /* Three.js canvas — fixed, full viewport, behind everything */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* HTML sections sit above the canvas */
+        .section {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        /* ─── Header ──────────────────────────────────── */
+        #main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            padding: 26px 45px;
+        }
+
+        .header-hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .header-hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #0f0f0f;
+        }
+
+        .header-logo {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .header-logo img {
+            height: 36px;
+            width: auto;
+            display: block;
+        }
+
+        .header-enquire {
+            margin-left: auto;
+            font-family: 'Inter', sans-serif;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            background-color: #999;
+            padding: 8px 12px;
+            color: #333;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* ─── Nav Panel ────────────────────────────────── */
+        #nav-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 199;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        #nav-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #nav-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 50vw;
+            height: 100vh;
+            background: #d2d2d2;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 90px;
+        }
+
+        #nav-panel.is-open {
+            transform: translateX(0);
+        }
+
+        #nav-close {
+            position: absolute;
+            top: 24px;
+            left: 43px;
+            font-size: 22px;
+            font-weight: 300;
+            line-height: 1;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #0f0f0f;
+            padding: 2px;
+        }
+
+        .nav-item {
+            display: block;
+            font-family: Georgia, serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #0f0f0f;
+            text-decoration: none;
+            line-height: 1.35;
+        }
+
+        .nav-item.nav-current,
+        .nav-sub a.nav-current {
+            color: #aaa;
+        }
+
+        .nav-sub {
+            padding-left: 36px;
+            margin-bottom: 2px;
+        }
+
+        .nav-sub a {
+            display: block;
+            font-family: Georgia, serif;
+            font-size: 16px;
+            color: #0f0f0f;
+            text-decoration: none;
+            line-height: 1.9;
+        }
+
+        /* ─── Hero Section ────────────────────────────── */
+        #hero {
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Title block — left/top set via JS */
+        #hero-title {
+            position: absolute;
+        }
+
+        .title-word {
+            display: block;
+            width: fit-content;
+            font-family: Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(90px, 8.5vw, 200px);
+            line-height: 0.88;
+            color: #0f0f0f;
+            white-space: nowrap;
+        }
+
+        /* Description — left/bottom set via JS */
+        #hero-desc {
+            position: absolute;
+        }
+
+        #hero-desc p {
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.55;
+            color: #222;
+            width: fit-content;
+        }
+
+        #hero-desc p strong {
+            font-weight: 700;
+        }
+
+        #hero-subtitle {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 16px;
+            line-height: 1;
+            color: #222;
+            margin-top: 6px;
+            width: fit-content;
+        }
+
+
+        /* ─── Section Two ────────────────────────────── */
+
+        /* Fixed overlay — no document height added, always in viewport.
+           Fades in when JS adds .s2-visible */
+        #section-two {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.7s ease;
+        }
+
+        /* Clip window — exactly one item tall, hides everything outside */
+        #s2-content {
+            position: absolute;
+            left: 50%;
+            right: 45px;
+            top: 115px;
+            bottom: 52px;
+            overflow: hidden;
+        }
+
+        /* Tall inner strip — GSAP translates this upward as camera moves down */
+        #s2-inner {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Each item fills exactly one slot (= the clip window height) */
+        .s2-item {
+            height: calc(100vh - 167px); /* 167 = 115 top + 52 bottom */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Parallel tether-line container — mirrors #s2-content's bounds but spans
+           the gap between building right edge and content left edge.
+           overflow: hidden clips lines vertically as they scroll. */
+        #s2-lines-wrap {
+            position: absolute;
+            left: 42%;
+            right: 50%;
+            top: 115px;
+            bottom: 52px;
+            overflow: hidden;
+        }
+
+        /* Tall inner strip — receives the same GSAP translateY as #s2-inner */
+        #s2-lines-inner {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* One slot per item — same height so lines stay locked to headings */
+        .s2-line-slot {
+            height: calc(100vh - 167px);
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* The actual tether line — spans full slot width (= building gap),
+           grows left→right via scaleX */
+        .s2-tether-line {
+            width: 100%;
+            height: 1px;
+            background: #0f0f0f;
+            transform-origin: left center;
+            transform: scaleX(0); /* GSAP reveals this */
+        }
+
+        .s2-heading {
+            font-family: Georgia, serif;
+            font-size: 32px;
+            font-weight: 600;
+            /* letter-spacing: 0.12em; */
+            /* text-transform: uppercase; */
+            color: #0f0f0f;
+            margin-bottom: 11px;
+            opacity: 0; /* GSAP reveals this */
+        }
+
+        .s2-body {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.72;
+            color: #333;
+            max-width: 320px;
+            opacity: 0; /* GSAP reveals this */
+        }
+
+        /* Black line — position set via JS */
+        #hero-line {
+            position: absolute;
+            width: 1px;
+            height: 100vh;
+            background: #0f0f0f;
+        }
+
+        /* ─── Section Three ──────────────────────────── */
+
+        /* Fixed overlay — sits above canvas + section-two (z-index: 2).
+           No background on the container; each panel carries its own colour.
+           Panels start off-screen (GSAP sets x) and animate in from their sides. */
+        /* Hidden until s3EntryTl plays — visibility avoids conflicting with GSAP's
+           transform management on the child panels. */
+        #section-three {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        #s3-left {
+            width: 50%;
+            height: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            padding: 115px 48px 52px 45px;
+            flex-shrink: 0;
+            pointer-events: auto;
+        }
+
+        #s3-heading {
+            font-family: Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(30px, 3vw, 52px);
+            line-height: 1.1;
+            color: #0f0f0f;
+            margin-bottom: 44px;
+        }
+
+        /* 2-column stat grid */
+        #s3-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            row-gap: 28px;
+            margin-bottom: 44px;
+        }
+
+        .s3-stat-col {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .s3-stat-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 10.5px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            color: #777;
+            text-transform: uppercase;
+        }
+
+        .s3-stat-value {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f0f0f;
+            line-height: 1.45;
+        }
+
+        /* Accordion — dark border top and bottom, light dividers between items */
+        #s3-accordion {
+            border-top: 1px solid #0f0f0f;
+            border-bottom: 1px solid #0f0f0f;
+        }
+
+        .s3-acc-item {
+            padding: 17px 12px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .s3-acc-item:last-child {
+            border-bottom: none;
+        }
+
+        .s3-acc-item:hover,
+        .s3-acc-item.s3-acc-active {
+            background: #e4e4e4;
+        }
+
+        .s3-acc-label {
+            font-family: Georgia, serif;
+            font-size: 20px;
+            color: #0f0f0f;
+        }
+
+        /* Footer blurb — pushed to bottom via margin-top: auto */
+        #s3-footer-text {
+            margin-top: auto;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            line-height: 1.68;
+            color: #555;
+            max-width: 400px;
+        }
+
+        #s3-right {
+            width: 50%;
+            height: 100%;
+            background: #d2d2d2;
+            flex-shrink: 0;
+        }
+
+        /* ─── Section Four ──────────────────────────── */
+
+        /* Fixed overlay, above section-three. White bg is always at x:0 — it covers
+           s3-right the moment visibility flips. visibility:hidden until s4EntryTl fires. */
+        #section-four {
+            position: fixed;
+            inset: 0;
+            z-index: 3;
+            background: #ffffff;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        /* Top boundary line — matches hero/s2 content top at 115px */
+        #s4-line-top {
+            position: absolute;
+            top: 115px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #0f0f0f;
+        }
+
+        /* Accordion fills the section below the top line */
+        #s4-accordion {
+            position: absolute;
+            top: 116px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Each item: overflow:hidden clips grey box + right content when collapsed.
+           Height is animated by GSAP between collapsed (64px) and expanded. */
+        .s4-item {
+            position: relative;
+            border-top: 1px solid #0f0f0f;
+            overflow: hidden;
+            cursor: pointer;
+            flex-shrink: 0;
+            pointer-events: auto;
+        }
+
+        .s4-item:last-child {
+            border-bottom: 1px solid #0f0f0f;
+        }
+
+        /* Label zone — left column only, z-index above grey box so it stays readable */
+        .s4-item-label-wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 28%;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 45px;
+            z-index: 1;
+        }
+
+        .s4-item-label {
+            font-family: Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(18px, 1.9vw, 26px);
+            color: #0f0f0f;
+            white-space: nowrap;
+        }
+
+        /* Grey box — center column, body zone only (clipped to nothing when collapsed) */
+        .s4-item-grey {
+            position: absolute;
+            top: 64px;
+            bottom: 0;
+            left: 28%;
+            right: 28%;
+            background: #d2d2d2;
+        }
+
+        /* Right column — desc at top, stats at bottom (clipped when collapsed) */
+        .s4-item-right {
+            position: absolute;
+            top: 64px;
+            bottom: 0;
+            left: 74%;
+            right: 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 18px 0;
+        }
+
+        .s4-item-desc {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            line-height: 1.68;
+            color: #333;
+        }
+
+        .s4-item-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .s4-stat-col {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .s4-stat-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 10.5px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            color: #777;
+            text-transform: uppercase;
+        }
+
+        .s4-stat-value {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f0f0f;
+        }
+
+        /* ─── Section Six ───────────────────────────── */
+
+        #section-six {
+            position: fixed;
+            inset: 0;
+            z-index: 6;
+            background: #ffffff;
+            visibility: hidden;
+        }
+
+        #s6-heading {
+            position: absolute;
+            top: 115px;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: Georgia, serif;
+            font-weight: 500;
+            font-size: clamp(24px, 4vw, 52px);
+            color: #0f0f0f;
+            line-height: 1;
+        }
+
+        #s6-map-wrap {
+            position: absolute;
+            top: 258px;
+            bottom: 148px;
+            left: 6%;
+            right: 6%;
+        }
+
+        #s6-map {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ── Map pins ── */
+
+        .map-pin {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            cursor: default;
+        }
+
+        .map-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #0f0f0f;
+            box-shadow: 0 0 0 3px rgba(15, 15, 15, 0.12);
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .map-pin:hover .map-dot {
+            transform: scale(1.5);
+        }
+
+        .map-pin-card {
+            margin-bottom: 10px;
+            width: 168px;
+            background: #ffffff;
+            border: 1px solid #e2e2e2;
+            padding: 13px 15px 14px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(5px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .map-pin:hover .map-pin-card {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .map-pin-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .map-pin-title {
+            font-family: Georgia, serif;
+            font-size: 14px;
+            color: #0f0f0f;
+            margin-bottom: 9px;
+            line-height: 1.2;
+        }
+
+        .map-pin-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border-top: 1px solid #ebebeb;
+            padding-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .map-pin-features li {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            color: #555;
+            line-height: 1.4;
+            padding-left: 10px;
+            position: relative;
+        }
+
+        .map-pin-features li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: #bbb;
+        }
+
+        #s6-body {
+            position: absolute;
+            bottom: 52px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(480px, 80vw);
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            line-height: 1.72;
+            color: #555;
+        }
+
+        /* ─── Section Five ──────────────────────────── */
+
+        /* Fixed overlay above section-four. s5-box starts as a zero-scale point
+           at the centre and expands to fill the viewport on scroll. */
+        #section-five {
+            position: fixed;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        #s5-box {
+            position: absolute;
+            inset: 0;
+            background: #d2d2d2;
+        }
+
+        #s5-label {
+            position: absolute;
+            top: 58px;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #888;
+            opacity: 0;
+        }
+
+        #s5-title-top,
+        #s5-title-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(58px, 7.5vw, 108px);
+            line-height: 1;
+            color: #0f0f0f;
+            opacity: 0;
+        }
+
+        #s5-title-top    { bottom: 68%; }
+        #s5-title-bottom { top: 68%; }
+
+        #s5-body {
+            position: absolute;
+            top: 84%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(460px, 80vw);
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            line-height: 1.72;
+            color: #333;
+            opacity: 0;
+        }
+
+        /* ─── Section Seven — Footer ──────────────────────── */
+
+        /* @property lets the browser transition --fw as a length (CSS clip-path
+           can't be transitioned without it). inherits:true so .ft-dark can read it. */
+        @property --fw {
+            syntax: '<length>';
+            inherits: true;
+            initial-value: 0px;
+        }
+
+        #section-seven {
+            position: fixed;
+            inset: 0;
+            z-index: 7;
+            visibility: hidden;
+            background: #ffffff;
+            --fw: 0px;
+            transition: --fw 1.6s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        /* Adding .is-in grows --fw, which widens the black clip panel from the left */
+        #section-seven.is-in {
+            --fw: calc(100vw - 392.5px);
+            transition-delay: 0.45s;
+        }
+
+        /* ── Contact half (top 50%) ── */
+
+        #s7-contact {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            display: flex;
+            align-items: center;
+            padding: 0 6%;
+            gap: 8%;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .ct-left {
+            flex: 0 0 36%;
+        }
+
+        .ct-title {
+            font-family: Georgia, serif;
+            font-weight: 700;
+            font-size: clamp(26px, 2.4vw, 52px);
+            line-height: 1.1;
+            color: #0f0f0f;
+            margin-bottom: 18px;
+        }
+
+        .ct-sub {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.65;
+            color: #555;
+        }
+
+        .ct-form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ct-field {
+            display: flex;
+            align-items: flex-start;
+            padding: 18px 0 8px;
+        }
+
+        .ct-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            color: #888;
+            flex: 0 0 64px;
+            padding-top: 3px;
+        }
+
+        .ct-input-wrap {
+            flex: 1;
+        }
+
+        .ct-input {
+            display: block;
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #0f0f0f;
+            background: transparent;
+            font-family: Georgia, serif;
+            font-size: 15px;
+            color: #0f0f0f;
+            padding: 0 0 6px;
+            outline: none;
+        }
+
+        .ct-input:focus {
+            border-bottom-width: 2px;
+        }
+
+        .ct-submit {
+            align-self: flex-end;
+            margin-top: 24px;
+            padding: 10px 28px;
+            background: #0f0f0f;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+        }
+
+        .ct-submit:hover {
+            background: #333;
+        }
+
+        .ct-help {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            color: #c2c2c2;
+            margin-top: 5px;
+        }
+
+        /* ── Footer half (bottom 50%) ── */
+
+        #s7-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+        }
+
+        .ft-layer {
+            position: absolute;
+            inset: 0;
+        }
+
+        /* Black panel — clipped to [0, --fw] from the left, grows rightward.
+           clip-path is relative to ft-dark's own box (= full width of #s7-footer). */
+        .ft-dark {
+            background: #0f0f0f;
+            color: #ffffff;
+            clip-path: inset(0 calc(100vw - var(--fw)) 0 0);
+        }
+
+        .ft-nav > * {
+            position: absolute;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 14px;
+            color: inherit;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .ft-nav a:hover {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        /* Grey bar between the nav block and the question copy */
+        .ft-bar {
+            position: absolute;
+            left: 460px;
+            top: 114.5px;
+            width: 7px;
+            height: 94px;
+            background: #939393;
+        }
+
+        .ft-q,
+        .ft-body {
+            position: absolute;
+            left: 480px;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 17px;
+            white-space: nowrap;
+        }
+
+        .ft-q    { top: 112.4px; }
+        .ft-body { top: 146.4px; }
+
+        /* Large heading anchored to the right edge (mirrors ref's calc(--W - 396px)) */
+        .ft-head {
+            position: absolute;
+            left: calc(100vw - 396px);
+            top: 143.25px;
+            margin: 0;
+            font-family: Georgia, serif;
+            font-size: 48px;
+            line-height: 55px;
+            font-weight: 700;
+            white-space: nowrap;
+            color: #0f0f0f;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Fixed Header (persists across all sections) -->
+    <header id="main-header">
+        <div class="header-hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <span class="header-enquire">Enquire</span>
+    </header>
+
+    <!-- Nav Overlay + Panel -->
+    <div id="nav-overlay"></div>
+    <div id="nav-panel">
+        <button id="nav-close">&#x2715;</button>
+        <nav>
+            <a class="nav-item" href="#">Home</a>
+            <a class="nav-item" href="#">About</a>
+            <div class="nav-item">Work
+                <div class="nav-sub">
+                    <a class="nav-current" href="#">Fifth Avenue</a>
+                    <a href="#">Roots</a>
+                </div>
+            </div>
+            <a class="nav-item" href="#">Contact</a>
+        </nav>
+    </div>
+
+    <!-- ─── Hero Section ─────────────────────────────── -->
+    <section id="hero" class="section">
+        <div id="hero-title">
+            <span class="title-word">FIFTH</span>
+            <span class="title-word">AVENUE</span>
+            <p id="hero-subtitle">Tellapur, 2027</p>
+        </div>
+        <div id="hero-desc">
+            <p>45 Residential Floors.</p>
+            <p><strong>Ascending with the Birds</strong></p>
+        </div>
+        <div id="hero-line"></div>
+    </section>
+
+    <!-- ─── Section Two ──────────────────────────────── -->
+    <section id="section-two">
+        <!-- Parallel tether-line strip — scrolls in sync with #s2-inner via same GSAP y tween -->
+        <div id="s2-lines-wrap">
+            <div id="s2-lines-inner">
+                <div class="s2-line-slot"><div class="s2-tether-line"></div></div>
+                <div class="s2-line-slot"><div class="s2-tether-line"></div></div>
+                <div class="s2-line-slot"><div class="s2-tether-line"></div></div>
+                <div class="s2-line-slot"><div class="s2-tether-line"></div></div>
+            </div>
+        </div>
+        <div id="s2-content">
+            <div id="s2-inner">
+                <div class="s2-item">
+                    <h3 class="s2-heading">Privacy & Open Views</h3>
+                    <p class="s2-body">Overlooking the expansive greens of ICRISAT, the development offers 80% open space, airy living and dining layouts, and large balconies with open views—designed to maximise privacy, openness, and skyline presence.</p>
+                </div>
+                <div class="s2-item">
+                    <h3 class="s2-heading">Material Intelligence</h3>
+                    <p class="s2-body">The principle is not simply to use green materials, but to understand why each material is chosen and what purpose it serves.</p>
+                </div>
+                <div class="s2-item">
+                    <h3 class="s2-heading">Ceiling Height</h3>
+                    <p class="s2-body">11 ft ceilings and 8 ft designer doors create room for more light, better airflow, and a home that lets both the structure and its people breathe easier.</p>
+                </div>
+                <div class="s2-item">
+                    <h3 class="s2-heading">Centralised Hot Water System</h3>
+                    <p class="s2-body">And fully air-conditioned homes with pre-installed 5-star-rated AC units.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Section Three ─────────────────────────────── -->
+    <section id="section-three">
+
+        <!-- Left panel — white, slides in from left -->
+        <div id="s3-left">
+            <h2 id="s3-heading">Generously sized 3 &amp; 4<br>BHK skyline residencies</h2>
+
+            <div id="s3-stats">
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">Size</span>
+                    <span class="s3-stat-value">2635 to<br>3845 sq.ft.</span>
+                </div>
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">Ceiling Ht.</span>
+                    <span class="s3-stat-value">11 ft</span>
+                </div>
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">Hot Water</span>
+                    <span class="s3-stat-value">Central</span>
+                </div>
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">A/C</span>
+                    <span class="s3-stat-value">Central</span>
+                </div>
+            </div>
+
+            <div id="s3-accordion">
+                <div class="s3-acc-item">
+                    <span class="s3-acc-label">Layout</span>
+                </div>
+                <div class="s3-acc-item">
+                    <span class="s3-acc-label">Materials</span>
+                </div>
+                <div class="s3-acc-item">
+                    <span class="s3-acc-label">Surroundings</span>
+                </div>
+            </div>
+
+            <p id="s3-footer-text">At Fifth Avenue, every detail is considered to engage the five senses, creating a home that is experienced, not simply inhabited.</p>
+        </div>
+
+        <!-- Right panel — grey, slides in from right -->
+        <div id="s3-right"></div>
+
+    </section>
+
+    <!-- ─── Section Four ─────────────────────────────── -->
+    <section id="section-four">
+
+        <!-- Top boundary line -->
+        <div id="s4-line-top"></div>
+
+        <!-- Accordion — each item expands on hover to reveal grey box + content.
+             Heights are driven by GSAP; overflow:hidden clips the body when collapsed. -->
+        <div id="s4-accordion">
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Clubhouse</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">50,000+ sq.&thinsp;ft. dedicated to leisure,<br>laughter, and community building.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">SQ. FT.</span><span class="s4-stat-value">50,000+</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">POOL</span><span class="s4-stat-value">40 ft.</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Sports Complex</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">World-class sporting facilities<br>across multiple disciplines.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">COURTS</span><span class="s4-stat-value">6</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">AREA</span><span class="s4-stat-value">12,000 sq.ft.</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Walking Track</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">A serene loop through<br>curated landscaped greenery.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">LENGTH</span><span class="s4-stat-value">400 m</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">LEVELS</span><span class="s4-stat-value">2</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Swimming Pool</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">A full-length pool designed<br>for leisure and lap swimming.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">LENGTH</span><span class="s4-stat-value">40 ft.</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">DEPTH</span><span class="s4-stat-value">1.8 m</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ─── Section Five ─────────────────────────────── -->
+    <!-- ─── Section Six ──────────────────────────────── -->
+    <section id="section-six">
+        <div id="s6-heading">If We Found You at Fifth Avenue, Where Would You Be?</div>
+        <div id="s6-map-wrap">
+            <canvas id="s6-map"></canvas>
+
+            <!-- Park -->
+            <div class="map-pin" style="left: 20%; top: 33%">
+                <div class="map-pin-card">
+                    <div class="map-pin-label">Open Space</div>
+                    <div class="map-pin-title">The Grove</div>
+                    <ul class="map-pin-features">
+                        <li>1.2 acres landscaped park</li>
+                        <li>Jogging trail</li>
+                        <li>Children's play area</li>
+                    </ul>
+                </div>
+                <div class="map-dot"></div>
+            </div>
+
+            <!-- Road -->
+            <div class="map-pin" style="left: 45%; top: 41%">
+                <div class="map-pin-card">
+                    <div class="map-pin-label">Connectivity</div>
+                    <div class="map-pin-title">Main Approach</div>
+                    <ul class="map-pin-features">
+                        <li>40-ft wide boulevard</li>
+                        <li>Gated entry point</li>
+                        <li>Street-lit perimeter road</li>
+                    </ul>
+                </div>
+                <div class="map-dot"></div>
+            </div>
+
+            <!-- Clubhouse -->
+            <div class="map-pin" style="left: 64%; top: 54%">
+                <div class="map-pin-card">
+                    <div class="map-pin-label">Amenity</div>
+                    <div class="map-pin-title">Clubhouse</div>
+                    <ul class="map-pin-features">
+                        <li>Swimming pool & deck</li>
+                        <li>Rooftop terrace</li>
+                        <li>Residents' lounge</li>
+                    </ul>
+                </div>
+                <div class="map-dot"></div>
+            </div>
+        </div>
+        <p id="s6-body">Everyday life was always meant to be punctuated by birdsong, sunsets, and fresh air. At Fifth Avenue, we bring that vision to life with 80% open space.</p>
+    </section>
+
+    <section id="section-five">
+        <div id="s5-box"></div>
+        <div id="s5-label">| Sustainability |</div>
+        <div id="s5-title-top">The Anatomy</div>
+        <div id="s5-title-bottom">Of Your Home</div>
+        <p id="s5-body">Our Fifth Avenue homes in Kollur, Hyderabad, embody sustainability from the inside out. Every considered detail contributes to a bigger picture, shaping a more enriched way of living.</p>
+    </section>
+
+    <!-- ─── Section Seven — Contact + Footer ───────────────────────── -->
+    <section id="section-seven">
+
+        <!-- Top half: contact form -->
+        <div id="s7-contact">
+            <div class="ct-left">
+                <h2 class="ct-title">A thoughtful choice<br>deserves a thoughtful<br>conversation.</h2>
+                <p class="ct-sub">Leave your details and our Customer<br>Delight Manager will take it from here.</p>
+            </div>
+            <form class="ct-form" onsubmit="return false">
+                <div class="ct-field">
+                    <label class="ct-label" for="ct-name">NAME:</label>
+                    <div class="ct-input-wrap">
+                        <input class="ct-input" id="ct-name" name="name" autocomplete="name">
+                    </div>
+                </div>
+                <div class="ct-field">
+                    <label class="ct-label" for="ct-email">EMAIL:</label>
+                    <div class="ct-input-wrap">
+                        <input class="ct-input" id="ct-email" name="email" type="email" autocomplete="email">
+                        <span class="ct-help">This will help us get in touch with you</span>
+                    </div>
+                </div>
+                <div class="ct-field">
+                    <label class="ct-label" for="ct-note">NOTE:</label>
+                    <div class="ct-input-wrap">
+                        <input class="ct-input" id="ct-note" name="note">
+                        <span class="ct-help">What would you like to discuss?</span>
+                    </div>
+                </div>
+                <button type="submit" class="ct-submit">Submit</button>
+            </form>
+        </div>
+
+        <!-- Bottom half: footer with black-panel wipe animation.
+             ft-base = always-visible light layer; ft-dark = clipped black panel. -->
+        <div id="s7-footer">
+            <div class="ft-layer ft-base">
+                <nav class="ft-nav" aria-hidden="true">
+                    <span style="left:121.5px; top:113.6px">WORK</span><span style="left:243px; top:113.6px">JOURNAL</span>
+                    <span style="left:121.5px; top:145.6px">TEAM</span><span style="left:243.5px; top:145.6px">ABOUT US</span>
+                    <span style="left:122.5px; top:181.1px">CONTACT</span><span style="left:243.5px; top:181.1px">CAREER</span>
+                </nav>
+                <span class="ft-bar"></span>
+                <p class="ft-q"><b>What if your next-door neighbour was 50 years old?</b></p>
+                <p class="ft-body">A 50-year-old peepal tree, carefully transplanted to put down<br>roots alongside you.</p>
+                <h2 class="ft-head">Towards<br>Thought-Led<br>Development</h2>
+            </div>
+            <!-- Same copy in white — clipped to the black panel so text turns
+                 white as the panel sweeps over it. ft-head sits outside the panel. -->
+            <div class="ft-layer ft-dark">
+                <nav class="ft-nav">
+                    <a href="#" style="left:121.5px; top:113.6px">WORK</a><a href="#" style="left:243px; top:113.6px">JOURNAL</a>
+                    <a href="#" style="left:121.5px; top:145.6px">TEAM</a><a href="#" style="left:243.5px; top:145.6px">ABOUT US</a>
+                    <a href="#" style="left:122.5px; top:181.1px">CONTACT</a><a href="#" style="left:243.5px; top:181.1px">CAREER</a>
+                </nav>
+                <span class="ft-bar"></span>
+                <p class="ft-q"><b>What if your next-door neighbour was 50 years old?</b></p>
+                <p class="ft-body">A 50-year-old peepal tree, carefully transplanted to put down<br>roots alongside you.</p>
+            </div>
+        </div>
+
+    </section>
+
+    <script src="site.js"></script>
+</body>
+</html>

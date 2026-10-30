@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fifth Ave</title>
+
+    <!-- Shared fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../../shared/fonts.css">
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<!-- GSAP + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #d2d2d2;
+            color: #0f0f0f;
+            overflow: hidden; /* page is a fixed viewport — wheel events drive all transitions */
+        }
+
+        /* ── Side Navigation ── */
+
+        #side-nav {
+            position: fixed;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Fixed width so the dot and number are always horizontally centred
+               at the same pixel — prevents a left-shift when items resize */
+            width: 32px;
+            gap: 1px;
+            transition: gap  0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Expanded: hover OR first-load intro class */
+        #side-nav:hover,
+        #side-nav.nav-intro {
+            gap: 8px;
+            left: 10px;
+        }
+
+        /* ── Dot state (default) ── */
+        .side-nav-item {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'PartnerSerif', serif;
+            font-size: 0;            /* text hidden in dot state */
+            font-weight: 400;
+            color: #0f0f0f;
+            letter-spacing: 0.04em;
+            padding: 0;
+            position: relative;
+            width: 32px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transform-origin: center;
+            transform: scale(1);
+            opacity: 1;
+            transition: height    0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        font-size 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity   0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        font-weight 0s;
+        }
+
+        /* Dot indicator */
+        .side-nav-item::before {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #0f0f0f;
+            opacity: 0.3;
+            transition: width   0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        height  0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Active dot — slightly larger, full opacity */
+        .side-nav-item.is-active::before {
+            width: 6px;
+            height: 6px;
+            opacity: 1;
+        }
+
+        /* ── Expanded state (hover or intro) ── */
+        #side-nav:hover .side-nav-item,
+        #side-nav.nav-intro .side-nav-item {
+            font-size: 13px;
+            height: 32px;
+            transform: scale(0.72);
+            opacity: 0.28;
+        }
+
+        /* Hide dot when numbers are showing */
+        #side-nav:hover .side-nav-item::before,
+        #side-nav.nav-intro .side-nav-item::before {
+            width: 0;
+            height: 0;
+            opacity: 0;
+        }
+
+        /* Active item in expanded state */
+        #side-nav:hover .side-nav-item.is-active,
+        #side-nav.nav-intro .side-nav-item.is-active {
+            transform: scale(1.5);
+            opacity: 1;
+            font-weight: 700;
+        }
+
+        /* Three.js canvas — fixed, full viewport, behind everything */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* HTML sections sit above the canvas */
+        .section {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        /* ─── Header ──────────────────────────────────── */
+        /* Injected by shared/inject-header.js */
+
+
+
+        /* ─── Hero Section ────────────────────────────── */
+        #hero {
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Title block — left/top set via JS */
+        #hero-title {
+            position: absolute;
+        }
+
+        .title-word {
+            display: block;
+            width: fit-content;
+            font-family: 'PartnerSerif', serif;
+            font-weight: 900;
+            font-size: clamp(90px, 8.5vw, 200px);
+            line-height: 0.88;
+            color: #0f0f0f;
+            white-space: nowrap;
+        }
+
+        /* Description — left/bottom set via JS */
+        #hero-desc {
+            position: absolute;
+        }
+
+        #hero-desc p {
+            font-family: 'PartnerSerif', serif;
+            font-size: 16px;
+            line-height: 1.55;
+            color: #222;
+            width: fit-content;
+        }
+
+        #hero-desc p strong {
+            font-weight: 700;
+        }
+
+        #hero-subtitle {
+            font-family: 'PartnerSerif', serif;
+            font-size: 16px;
+            line-height: 1;
+            color: #222;
+            margin-top: 6px;
+            width: fit-content;
+        }
+
+
+        /* ─── Section Two ────────────────────────────── */
+
+        /* Fixed overlay — no document height added, always in viewport.
+           Fades in when JS adds .s2-visible */
+        #section-two {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.7s ease;
+        }
+
+        /* Clip window — exactly one item tall, hides everything outside */
+        #s2-content {
+            position: absolute;
+            left: 50%;
+            right: 45px;
+            top: 115px;
+            bottom: 52px;
+            overflow: hidden;
+        }
+
+        /* Tall inner strip — GSAP translates this upward as camera moves down */
+        #s2-inner {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Each item fills exactly one slot (= the clip window height) */
+        .s2-item {
+            height: calc(100vh - 167px); /* 167 = 115 top + 52 bottom */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Parallel tether-line container — mirrors #s2-content's bounds but spans
+           the gap between building right edge and content left edge.
+           overflow: hidden clips lines vertically as they scroll. */
+        #s2-lines-wrap {
+            position: absolute;
+            left: 42%;
+            right: 50%;
+            top: 115px;
+            bottom: 52px;
+            overflow: hidden;
+        }
+
+        /* Tall inner strip — receives the same GSAP translateY as #s2-inner */
+        #s2-lines-inner {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* One slot per item — same height so lines stay locked to headings */
+        .s2-line-slot {
+            height: calc(100vh - 167px);
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* The actual tether line — spans full slot width (= building gap),
+           grows left→right via scaleX */
+        .s2-tether-line {
+            width: 100%;
+            height: 1px;
+            background: #0f0f0f;
+            transform-origin: left center;
+            transform: scaleX(0); /* GSAP reveals this */
+        }
+
+        .s2-heading {
+            font-family: 'PartnerSerif', serif;
+            font-size: 32px;
+            font-weight: 600;
+            /* letter-spacing: 0.12em; */
+            /* text-transform: uppercase; */
+            color: #0f0f0f;
+            margin-bottom: 11px;
+            opacity: 0; /* GSAP reveals this */
+        }
+
+        .s2-body {
+            font-family: 'PartnerSerif', serif;
+            font-size: 14px;
+            line-height: 1.72;
+            color: #333;
+            max-width: 320px;
+            opacity: 0; /* GSAP reveals this */
+        }
+
+        /* Black line — position set via JS */
+        #hero-line {
+            position: absolute;
+            width: 1px;
+            height: 100vh;
+            background: #0f0f0f;
+        }
+
+        /* ─── Section Three ──────────────────────────── */
+
+        /* Fixed overlay — sits above canvas + section-two (z-index: 2).
+           No background on the container; each panel carries its own colour.
+           Panels start off-screen (GSAP sets x) and animate in from their sides. */
+        /* Hidden until s3EntryTl plays — visibility avoids conflicting with GSAP's
+           transform management on the child panels. */
+        #section-three {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        #s3-left {
+            width: 50%;
+            height: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            padding: 115px 48px 52px 45px;
+            flex-shrink: 0;
+            pointer-events: auto;
+        }
+
+        #s3-heading {
+            font-family: 'PartnerSerif', serif;
+            font-weight: 900;
+            font-size: clamp(30px, 3vw, 52px);
+            line-height: 1.1;
+            color: #0f0f0f;
+            margin-bottom: 44px;
+        }
+
+        /* 2-column stat grid */
+        #s3-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            row-gap: 28px;
+            margin-bottom: 44px;
+        }
+
+        .s3-stat-col {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .s3-stat-label {
+            font-family: 'PartnerSerif', serif;
+            font-size: 10.5px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            color: #777;
+            text-transform: uppercase;
+        }
+
+        .s3-stat-value {
+            font-family: 'PartnerSerif', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f0f0f;
+            line-height: 1.45;
+        }
+
+        /* Accordion — dark border top and bottom, light dividers between items */
+        #s3-accordion {
+            border-top: 1px solid #0f0f0f;
+            border-bottom: 1px solid #0f0f0f;
+        }
+
+        .s3-acc-item {
+            padding: 17px 12px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .s3-acc-item:last-child {
+            border-bottom: none;
+        }
+
+        .s3-acc-item:hover,
+        .s3-acc-item.s3-acc-active {
+            background: #e4e4e4;
+        }
+
+        .s3-acc-label {
+            font-family: 'PartnerSerif', serif;
+            font-size: 20px;
+            color: #0f0f0f;
+        }
+
+        /* Footer blurb — pushed to bottom via margin-top: auto */
+        #s3-footer-text {
+            margin-top: auto;
+            font-family: 'PartnerSerif', serif;
+            font-size: 13px;
+            line-height: 1.68;
+            color: #555;
+            max-width: 400px;
+        }
+
+        #s3-right {
+            width: 50%;
+            height: 100%;
+            background: #d2d2d2;
+            flex-shrink: 0;
+        }
+
+        /* ─── Section Four ──────────────────────────── */
+
+        /* Fixed overlay, above section-three. White bg is always at x:0 — it covers
+           s3-right the moment visibility flips. visibility:hidden until s4EntryTl fires. */
+        #section-four {
+            position: fixed;
+            inset: 0;
+            z-index: 3;
+            background: #ffffff;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        /* Top boundary line — matches hero/s2 content top at 115px */
+        #s4-line-top {
+            position: absolute;
+            top: 115px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #0f0f0f;
+        }
+
+        /* Accordion fills the section below the top line */
+        #s4-accordion {
+            position: absolute;
+            top: 116px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Each item: overflow:hidden clips grey box + right content when collapsed.
+           Height is animated by GSAP between collapsed (64px) and expanded. */
+        .s4-item {
+            position: relative;
+            border-top: 1px solid #0f0f0f;
+            overflow: hidden;
+            cursor: pointer;
+            flex-shrink: 0;
+            pointer-events: auto;
+        }
+
+        .s4-item:last-child {
+            border-bottom: 1px solid #0f0f0f;
+        }
+
+        /* Label zone — left column only, z-index above grey box so it stays readable */
+        .s4-item-label-wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 28%;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 45px;
+            z-index: 1;
+        }
+
+        .s4-item-label {
+            font-family: 'PartnerSerif', serif;
+            font-weight: 900;
+            font-size: clamp(18px, 1.9vw, 26px);
+            color: #0f0f0f;
+            white-space: nowrap;
+        }
+
+        /* Grey box — center column, body zone only (clipped to nothing when collapsed) */
+        .s4-item-grey {
+            position: absolute;
+            top: 64px;
+            bottom: 0;
+            left: 28%;
+            right: 28%;
+            background: #d2d2d2;
+        }
+
+        /* Right column — desc at top, stats at bottom (clipped when collapsed) */
+        .s4-item-right {
+            position: absolute;
+            top: 64px;
+            bottom: 0;
+            left: 74%;
+            right: 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 18px 0;
+        }
+
+        .s4-item-desc {
+            font-family: 'PartnerSerif', serif;
+            font-size: 13px;
+            line-height: 1.68;
+            color: #333;
+        }
+
+        .s4-item-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .s4-stat-col {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .s4-stat-label {
+            font-family: 'PartnerSerif', serif;
+            font-size: 10.5px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            color: #777;
+            text-transform: uppercase;
+        }
+
+        .s4-stat-value {
+            font-family: 'PartnerSerif', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f0f0f;
+        }
+
+        /* ─── Section Six ───────────────────────────── */
+
+        #section-six {
+            position: fixed;
+            inset: 0;
+            z-index: 6;
+            background: #ffffff;
+            visibility: hidden;
+        }
+
+        #s6-heading {
+            position: absolute;
+            top: 115px;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: 'PartnerSerif', serif;
+            font-weight: 500;
+            font-size: clamp(24px, 4vw, 52px);
+            color: #0f0f0f;
+            line-height: 1;
+        }
+
+        #s6-map-wrap {
+            position: absolute;
+            top: 258px;
+            bottom: 148px;
+            left: 6%;
+            right: 6%;
+        }
+
+        #s6-map {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ── Map pins ── */
+
+        .map-pin {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            cursor: default;
+        }
+
+        .map-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #0f0f0f;
+            box-shadow: 0 0 0 3px rgba(15, 15, 15, 0.12);
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .map-pin:hover .map-dot {
+            transform: scale(1.5);
+        }
+
+        .map-pin-card {
+            margin-bottom: 10px;
+            width: 168px;
+            background: #ffffff;
+            border: 1px solid #e2e2e2;
+            padding: 13px 15px 14px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(5px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .map-pin:hover .map-pin-card {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .map-pin-label {
+            font-family: 'PartnerSerif', serif;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .map-pin-title {
+            font-family: 'PartnerSerif', serif;
+            font-size: 14px;
+            color: #0f0f0f;
+            margin-bottom: 9px;
+            line-height: 1.2;
+        }
+
+        .map-pin-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border-top: 1px solid #ebebeb;
+            padding-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .map-pin-features li {
+            font-family: 'PartnerSerif', serif;
+            font-size: 11px;
+            color: #555;
+            line-height: 1.4;
+            padding-left: 10px;
+            position: relative;
+        }
+
+        .map-pin-features li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: #bbb;
+        }
+
+        #s6-body {
+            position: absolute;
+            bottom: 52px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(480px, 80vw);
+            text-align: center;
+            font-family: 'PartnerSerif', serif;
+            font-size: 15px;
+            line-height: 1.72;
+            color: #555;
+        }
+
+        /* ─── Section Five ──────────────────────────── */
+
+        /* Fixed overlay above section-four. s5-box starts as a zero-scale point
+           at the centre and expands to fill the viewport on scroll. */
+        #section-five {
+            position: fixed;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        #s5-box {
+            position: absolute;
+            inset: 0;
+            background: #d2d2d2;
+        }
+
+        #s5-label {
+            position: absolute;
+            top: 58px;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: 'PartnerSerif', serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #888;
+            opacity: 0;
+        }
+
+        #s5-title-top,
+        #s5-title-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: 'PartnerSerif', serif;
+            font-weight: 900;
+            font-size: clamp(58px, 7.5vw, 108px);
+            line-height: 1;
+            color: #0f0f0f;
+            opacity: 0;
+        }
+
+        #s5-title-top    { bottom: 68%; }
+        #s5-title-bottom { top: 68%; }
+
+        #s5-body {
+            position: absolute;
+            top: 84%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(460px, 80vw);
+            text-align: center;
+            font-family: 'PartnerSerif', serif;
+            font-size: 15px;
+            line-height: 1.72;
+            color: #333;
+            opacity: 0;
+        }
+
+        /* ─── Section Seven — overrides for the GSAP scroll system ──────────── */
+        /* Layout/visual rules live in shared/contact-footer.html (injected). */
+
+        #section-seven {
+            position: fixed;
+            inset: 0;
+            z-index: 7;
+            visibility: hidden; /* GSAP reveals it via s7EntryTl */
+        }
+
+        /* Inputs must accept clicks even though parent layers have pointer-events: none */
+        #s7-contact {
+            pointer-events: auto;
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Fixed Header — injected by shared/inject-header.js -->
+
+    <!-- Side Navigation — items populated by JS from SIDE_NAV config in site.js -->
+    <!-- nav-intro keeps it expanded on first load; JS removes the class after 2.5s -->
+    <nav id="side-nav" class="nav-intro" aria-label="Section navigation"></nav>
+
+
+    <!-- ─── Hero Section ─────────────────────────────── -->
+    <section id="hero" class="section">
+        <div id="hero-title">
+            <span class="title-word">FIFTH</span>
+            <span class="title-word">AVENUE</span>
+            <p id="hero-subtitle">Tellapur, 2027</p>
+        </div>
+        <div id="hero-desc">
+            <p>45 Residential Floors.</p>
+            <p><strong>Ascending with the Birds</strong></p>
+        </div>
+        <div id="hero-line"></div>
+    </section>
+
+    <!-- ─── Section Two ──────────────────────────────── -->
+    <section id="section-two">
+        <!-- Parallel tether-line strip — scrolls in sync with #s2-inner via same GSAP y tween -->
+        <div id="s2-lines-wrap">
+            <div id="s2-lines-inner">
+                <div class="s2-line-slot"><div class="s2-tether-line"></div></div>
+                <div class="s2-line-slot"><div class="s2-tether-line"></div></div>
+                <div class="s2-line-slot"><div class="s2-tether-line"></div></div>
+                <div class="s2-line-slot"><div class="s2-tether-line"></div></div>
+            </div>
+        </div>
+        <div id="s2-content">
+            <div id="s2-inner">
+                <div class="s2-item">
+                    <h3 class="s2-heading">Open Views</h3>
+                    <p class="s2-body">Overlooking 3,500 acres of ICRISAT greenery on one side and offering views of the ORR on the other, the spacious balconies offer a front-row seat to the beauty around you.</p>
+                </div>
+                <div class="s2-item">
+                    <h3 class="s2-heading">Superior Interiors</h3>
+                    <p class="s2-body">Your home is easy on the eyes, with a 9-foot entryway, modern bathrooms, and skilfully designed lighting for when the sun goes down.</p>
+                </div>
+                <div class="s2-item">
+                    <h3 class="s2-heading">Material Intelligence</h3>
+                    <p class="s2-body">Every specification is carefully assessed for long-term performance, with durability over the next 20 to 30 years in mind. Fifth Avenue is an address for generations to come.</p>
+                </div>
+                <div class="s2-item">
+                    <h3 class="s2-heading">Centralised Hot Water System</h3>
+                    <p class="s2-body">Enjoy the convenience of a centralised hot water system and fully air-conditioned homes equipped with pre-installed, 5-star-rated AC units.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Section Three ─────────────────────────────── -->
+    <section id="section-three">
+
+        <!-- Left panel — white, slides in from left -->
+        <div id="s3-left">
+            <h2 id="s3-heading">Generously sized 3 &amp; 4<br>BHK skyline residencies</h2>
+
+            <div id="s3-stats">
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">Size</span>
+                    <span class="s3-stat-value">2635 to<br>3845 sq.ft.</span>
+                </div>
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">Ceiling Ht.</span>
+                    <span class="s3-stat-value">11 ft</span>
+                </div>
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">Hot Water</span>
+                    <span class="s3-stat-value">Central</span>
+                </div>
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">A/C</span>
+                    <span class="s3-stat-value">Central</span>
+                </div>
+            </div>
+
+            <div id="s3-accordion">
+                <div class="s3-acc-item">
+                    <span class="s3-acc-label">Layout</span>
+                </div>
+                <div class="s3-acc-item">
+                    <span class="s3-acc-label">Materials</span>
+                </div>
+                <div class="s3-acc-item">
+                    <span class="s3-acc-label">Surroundings</span>
+                </div>
+            </div>
+
+            <p id="s3-footer-text">At Fifth Avenue, every detail is considered to engage the five senses, creating a home that is experienced, not simply inhabited.</p>
+        </div>
+
+        <!-- Right panel — grey, slides in from right -->
+        <div id="s3-right"></div>
+
+    </section>
+
+    <!-- ─── Section Four ─────────────────────────────── -->
+    <section id="section-four">
+
+        <!-- Top boundary line -->
+        <div id="s4-line-top"></div>
+
+        <!-- Accordion — each item expands on hover to reveal grey box + content.
+             Heights are driven by GSAP; overflow:hidden clips the body when collapsed. -->
+        <div id="s4-accordion">
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Clubhouse</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">50,000+ sq.&thinsp;ft. dedicated to leisure,<br>laughter, and community building.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">SQ. FT.</span><span class="s4-stat-value">50,000+</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">POOL</span><span class="s4-stat-value">40 ft.</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Sports Complex</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">Whatever your sport of choice,<br> there’s a space to pursue it every day.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">COURTS</span><span class="s4-stat-value">6</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">AREA</span><span class="s4-stat-value">12,000 sq.ft.</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Walking Track</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">Uninterrupted tracks for daily walks,<br> with scenic views of landscaped gardens.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">LENGTH</span><span class="s4-stat-value">400 m</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">LEVELS</span><span class="s4-stat-value">2</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Swimming Pool</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">Hydrotherapy for the body,<br> refreshing dips for the soul.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">LENGTH</span><span class="s4-stat-value">40 ft.</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">DEPTH</span><span class="s4-stat-value">1.8 m</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ─── Section Five ─────────────────────────────── -->
+    <!-- ─── Section Six ──────────────────────────────── -->
+    <section id="section-six">
+        <div id="s6-heading">If We Found You at Fifth Avenue, Where Would You Be?</div>
+        <div id="s6-map-wrap">
+            <canvas id="s6-map"></canvas>
+
+            <!-- Park -->
+            <div class="map-pin" style="left: 20%; top: 33%">
+                <div class="map-pin-card">
+                    <div class="map-pin-label">Open Space</div>
+                    <div class="map-pin-title">The Grove</div>
+                    <ul class="map-pin-features">
+                        <li>1.2 acres landscaped park</li>
+                        <li>Jogging trail</li>
+                        <li>Children's play area</li>
+                    </ul>
+                </div>
+                <div class="map-dot"></div>
+            </div>
+
+            <!-- Road -->
+            <div class="map-pin" style="left: 45%; top: 41%">
+                <div class="map-pin-card">
+                    <div class="map-pin-label">Connectivity</div>
+                    <div class="map-pin-title">Main Approach</div>
+                    <ul class="map-pin-features">
+                        <li>40-ft wide boulevard</li>
+                        <li>Gated entry point</li>
+                        <li>Street-lit perimeter road</li>
+                    </ul>
+                </div>
+                <div class="map-dot"></div>
+            </div>
+
+            <!-- Clubhouse -->
+            <div class="map-pin" style="left: 64%; top: 54%">
+                <div class="map-pin-card">
+                    <div class="map-pin-label">Amenity</div>
+                    <div class="map-pin-title">Clubhouse</div>
+                    <ul class="map-pin-features">
+                        <li>Swimming pool & deck</li>
+                        <li>Rooftop terrace</li>
+                        <li>Residents' lounge</li>
+                    </ul>
+                </div>
+                <div class="map-dot"></div>
+            </div>
+        </div>
+        <p id="s6-body">Everyday life was always meant to be punctuated by birdsong, sunsets, and fresh air. At Fifth Avenue, we bring that vision to life with 80% open space.</p>
+    </section>
+
+    <section id="section-five">
+        <div id="s5-box"></div>
+        <div id="s5-label">| Sustainability |</div>
+        <div id="s5-title-top">The Anatomy</div>
+        <div id="s5-title-bottom">Of Your Home</div>
+        <p id="s5-body">Our Fifth Avenue homes in Kollur, Hyderabad, embody sustainability from the inside out. Every considered detail contributes to a bigger picture, shaping a more enriched way of living.</p>
+    </section>
+
+    <!-- Header injected from shared/inject-header.js -->
+    <script src="../../shared/inject-header.js"></script>
+
+    <!-- Section Seven injected from shared/inject-contact-footer.js -->
+    <script src="../../shared/inject-contact-footer.js"></script>
+
+    <script src="site.js"></script>
+</body>
+</html>

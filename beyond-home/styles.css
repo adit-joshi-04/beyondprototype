@@ -1,0 +1,552 @@
+/* =====================================================================
+   Beyond Concrete — Option 2 · Scrolls 5–6
+   All sizes come from the 1440×900 Figma frame via --u (1 design px).
+   ===================================================================== */
+
+:root {
+  --vh: 100vh;
+  --u: min(calc(100vw / 1440), calc(var(--vh) / 900));
+  --bg: #d9d9d9;
+  --panel: #a1a1a1;
+  --white: #ffffff;
+  --ink: #000000;
+  --muted: #9a9a9a;
+  --serif: "PartnerSerif", Georgia, "Times New Roman", Times, serif;
+  --ease: cubic-bezier(.22, .72, .18, 1);
+}
+
+@supports (height: 100svh) { :root { --vh: 100svh; } }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
+
+/* Skip intro */
+.skip-intro {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  font-family: var(--serif);
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  pointer-events: auto;
+}
+
+.skip-intro.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.skip-intro__link {
+  color: inherit;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(0, 0, 0, 0.3);
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------------
+   PLACEHOLDERS (first half / next round)
+   --------------------------------------------------------------------- */
+.s-placeholder {
+  height: var(--vh);
+  display: grid;
+  place-items: center;
+  color: #8a8a8a;
+  font-size: calc(14 * var(--u));
+}
+.s-placeholder--end { height: 60vh; }
+
+/* Registered property so --sp-x can be CSS-transitioned */
+@property --sp-x {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+/* ---------------------------------------------------------------------
+   SPLIT PROJECT NAVIGATOR
+   --------------------------------------------------------------------- */
+.split-pin {
+  position: relative;
+  /* no z-index — pure scroll spacer, no visual content */
+  height: calc(var(--vh) * 2);  /* 200vh: 100vh entrance scroll + 100vh hold */
+  margin-top: -100vh;            /* overlap last 100vh of about section — no dead scroll gap */
+}
+
+/* .split lives outside .split-pin in the DOM so it is never trapped in
+   split-pin's stacking context. Always fixed so z-index is stable and there
+   is no sticky→fixed compositing layer swap that causes paint-order flicker. */
+.split {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--vh);
+  overflow: hidden;              /* clips panels while they sit off-screen left/right */
+  z-index: 5;                    /* above .s6/.s7/.contact/.footer (z-index 3) and about (z-index 2) */
+  pointer-events: none;          /* invisible when inactive — let clicks through to content below */
+  transition: --sp-x 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Restore pointer events while panels are visible */
+.split.is-entering,
+.split.is-open,
+.split.is-leaving {
+  pointer-events: auto;
+}
+
+/* Panels — absolute, start off-screen left/right, clipped by split's overflow */
+.sp-panel {
+  position: absolute;
+  inset: 0;
+}
+.sp-left  {
+  background: #c8c6c4;
+  transform: translateX(-100%);
+  transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.sp-right {
+  background: var(--bg);
+  transform: translateX(100%);
+  transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Panels are clipped at the --sp-x divider whenever visible (entering, open, leaving) */
+.split.is-entering .sp-left,
+.split.is-open     .sp-left,
+.split.is-leaving  .sp-left  { clip-path: inset(0 calc(100% - var(--sp-x)) 0 0); }
+
+.split.is-entering .sp-right,
+.split.is-open     .sp-right,
+.split.is-leaving  .sp-right { clip-path: inset(0 0 0 var(--sp-x)); }
+
+/* Entrance: slide panels in */
+.split.is-entering .sp-left  { transform: translateX(0); }
+.split.is-entering .sp-right { transform: translateX(0); }
+
+/* Open: entrance done, clear transform so clip-path alone controls the split */
+.split.is-open .sp-panel { transform: none; }
+
+/* Divider — hidden until open, then tracks --sp-x */
+.sp-divider {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: var(--sp-x);
+  transform: translateX(-0.5px);
+  width: 1px;
+  background: var(--ink);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.split.is-open .sp-divider { opacity: 1; }
+
+/* Outer border — hidden until panels have mostly arrived */
+.sp-frame {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--ink);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.split.is-entering .sp-frame { opacity: 1; transition-delay: 0.6s; }
+
+/* Typography — design px → --u */
+.sp-fifth,
+.sp-roots {
+  position: absolute;
+  margin: 0;
+  font-size: calc(128 * var(--u));
+  line-height: calc(126 * var(--u));
+  font-weight: 700;
+  white-space: nowrap;
+  font-family: var(--serif);
+  transition: opacity 0.4s ease;
+}
+.sp-fifth { left: calc(44 * var(--u));  top: calc(131 * var(--u)); }
+.sp-roots { right: calc(43 * var(--u)); bottom: calc(26 * var(--u)); }
+
+.sp-floors,
+.sp-villa {
+  position: absolute;
+  font-size: calc(24 * var(--u));
+  line-height: calc(24 * var(--u));
+  white-space: nowrap;
+  font-family: var(--serif);
+  transition: opacity 0.4s ease;
+}
+.sp-floors { left: calc(48 * var(--u));  bottom: calc(39 * var(--u)); }
+.sp-villa  { right: calc(43 * var(--u)); top: calc(140 * var(--u)); text-align: right; }
+
+.sp-right-shift { position: absolute; inset: 0; }
+
+/* Explore links */
+.sp-explore {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: calc(25 * var(--u));
+  font-size: calc(24 * var(--u));
+  line-height: calc(30 * var(--u));
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: var(--serif);
+  transition: opacity 0.4s ease, transform 0.4s var(--ease);
+}
+.sp-explore svg { flex: none; margin-top: calc(1 * var(--u)); }
+.sp-explore-left  { right: calc(230 * var(--u)); bottom: calc(40 * var(--u)); }
+.sp-explore-right { left: calc(189 * var(--u));  top: calc(138 * var(--u)); }
+.sp-explore:hover svg { transform: translateX(calc(6 * var(--u))); }
+.sp-explore svg { transition: transform 0.4s var(--ease); }
+
+/* Status badge */
+.sp-status {
+  position: absolute;
+  left: calc(213 * var(--u));
+  bottom: calc(44 * var(--u));
+  font-size: calc(16 * var(--u));
+  line-height: calc(20 * var(--u));
+  white-space: nowrap;
+  font-family: var(--serif);
+  transition: opacity 0.4s ease;
+}
+
+/* Fade out the receding panel's text when the other side is hovered */
+.split.hover-left .sp-right-shift,
+.split.hover-left .sp-explore-right,
+.split.hover-left .sp-status   { opacity: 0; }
+
+.split.hover-right .sp-fifth,
+.split.hover-right .sp-floors,
+.split.hover-right .sp-explore-left { opacity: 0; }
+.sp-dot {
+  position: absolute;
+  left: calc(-15 * var(--u));
+  top: calc(9.5 * var(--u));
+  width: calc(4 * var(--u));
+  height: calc(4 * var(--u));
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+/* ---------------------------------------------------------------------
+   SCROLL 6 — ONE/ONE BY NATURE
+   --------------------------------------------------------------------- */
+.s6 {
+  position: relative;
+  z-index: 0;
+  height: var(--vh);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+@media (hover: hover) and (pointer: fine) {
+  .s6 { cursor: none; }
+}
+.stage {
+  position: relative;
+  width: calc(1440 * var(--u));
+  height: calc(900 * var(--u));
+  margin: 0 auto;
+}
+
+.s6__title {
+  position: absolute;
+  left: calc(44 * var(--u));
+  top: calc(118 * var(--u));
+}
+.s6__big {
+  font-weight: 400;
+  font-size: calc(78 * var(--u));
+  line-height: calc(78 * var(--u));
+  letter-spacing: -.005em;
+}
+.s6__sub {
+  font-size: calc(25 * var(--u));
+  line-height: 1;
+  margin-top: calc(-4 * var(--u));
+  margin-left: calc(1 * var(--u));
+}
+
+.s6__note {
+  position: absolute;
+  left: calc(907 * var(--u));
+  top: calc(141 * var(--u));
+  font-size: calc(15 * var(--u));
+  line-height: calc(18 * var(--u));
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(calc(6 * var(--u)));
+  transition: opacity .3s ease, transform .3s ease;
+  pointer-events: none;
+}
+.s6__note.is-active {
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s ease .12s, transform .6s var(--ease) .12s;
+}
+.s6__diamond {
+  position: absolute;
+  left: calc(-26 * var(--u));
+  top: calc(8 * var(--u));
+  width: calc(16.5 * var(--u));
+  height: calc(16.5 * var(--u));
+  background: var(--white);
+  transform: rotate(45deg);
+}
+
+/* Cards: each box = rest shape + 30px breathing room each side (310×556),
+   so the tilted shape can grow past the rest outline. */
+.card {
+  position: absolute;
+  top: calc(253.2 * var(--u));
+  width: calc(310 * var(--u));
+  height: calc(556 * var(--u));
+  --rest: polygon(9.68% 5.4%, 90.32% 31.08%, 90.32% 94.66%, 9.68% 68.96%);
+  --tilt-a: polygon(17.35% 2.93%, 91.45% 28.51%, 77.06% 91.55%, 2.97% 65.86%);
+  --tilt-b: polygon(4.68% 4.01%, 71.1% 33.33%, 83% 96.37%, 16.39% 67.03%);
+}
+.card[data-i="0"] { left: calc(77.1 * var(--u));  --lx: 132.9; --hy: 308.8; }
+.card[data-i="1"] { left: calc(391.3 * var(--u)); --lx: 56.7;  --hy: 316.8; }
+.card[data-i="2"] { left: calc(714.4 * var(--u)); --lx: 30.6;  --hy: 308.8; }
+.card[data-i="3"] { left: calc(1038.1 * var(--u)); --lx: 29.9; --hy: 316.8; }
+
+.card__img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--panel) var(--img, none) center / cover no-repeat;
+  clip-path: var(--rest);
+  transition: clip-path .75s var(--ease);
+}
+.card__hit {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  clip-path: var(--rest);
+}
+.card.is-hover[data-tilt="a"] .card__img { clip-path: var(--tilt-a); }
+.card.is-hover[data-tilt="b"] .card__img { clip-path: var(--tilt-b); }
+
+.card__label {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--lx) * var(--u));
+  top: calc(526.8 * var(--u));
+  height: calc(28 * var(--u));
+  padding: 0 calc(10 * var(--u));
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  background: var(--white);
+  font-size: calc(14.5 * var(--u));
+  pointer-events: none;
+  transition: transform .75s var(--ease);
+}
+.card.is-hover .card__label {
+  transform: translate(
+    calc((132 - var(--lx)) * var(--u)),
+    calc((var(--hy) - 526.8) * var(--u))
+  );
+}
+
+/* soft radial cursor */
+.glow {
+  position: absolute;
+  z-index: 2;
+  left: 0; top: 0;
+  width: calc(136 * var(--u));
+  height: calc(136 * var(--u));
+  margin: calc(-68 * var(--u)) 0 0 calc(-68 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side,
+    rgba(255,255,255,.72) 0%,
+    rgba(255,255,255,.48) 35%,
+    rgba(255,255,255,.2) 70%,
+    rgba(255,255,255,0) 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .35s ease;
+  will-change: transform;
+}
+.glow.is-visible { opacity: 1; }
+
+/* ---------------------------------------------------------------------
+   Reduced motion / touch
+   --------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; }
+  html { scroll-behavior: auto; }
+}
+@media (hover: none) {
+  .glow { display: none; }
+}
+
+/* ---------------------------------------------------------------------
+   SCROLL 7 — quote + podcast clips
+   --------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------
+   SCROLL 7 — PODCAST (fan layout)
+   --------------------------------------------------------------------- */
+.s7 {
+  position: relative;
+  height: var(--vh);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: calc(148 * var(--u));
+  background: #f8f6f7;
+  overflow: hidden;
+}
+
+.s7__copy {
+  text-align: center;
+}
+
+.s7__heading {
+  font-size: calc(48 * var(--u));
+  line-height: calc(58 * var(--u));
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  transition: font-size 0.55s var(--ease), line-height 0.55s var(--ease), font-weight 0.55s var(--ease), color 0.55s var(--ease);
+}
+
+.s7__copy.is-activated .s7__heading {
+  font-size: calc(16 * var(--u));
+  line-height: calc(24 * var(--u));
+  font-weight: 400;
+  color: #666;
+}
+
+.s7__copy.is-activated .s7__heading br {
+  display: none;
+}
+
+.s7__heading-br {
+  display: none;
+}
+
+.s7__copy.is-activated .s7__heading-br {
+  display: inline;
+}
+
+/* Episode title — hidden until first card click */
+.s7__episode {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  font-size: calc(56 * var(--u));
+  line-height: calc(64 * var(--u));
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  transition: max-height 0.55s var(--ease), opacity 0.55s var(--ease), margin-top 0.55s var(--ease);
+}
+
+.s7__copy.is-activated .s7__episode {
+  max-height: calc(200 * var(--u));
+  opacity: 1;
+  margin-top: calc(8 * var(--u));
+}
+
+.s7__body {
+  margin-top: calc(22 * var(--u));
+  font-size: calc(16 * var(--u));
+  line-height: calc(23 * var(--u));
+  color: #444;
+}
+
+/* Episode label — appears below centre card on activation */
+.s7__card-label {
+  position: absolute;
+  bottom: calc(56 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: calc(11 * var(--u));
+  line-height: calc(18 * var(--u));
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+  pointer-events: none;
+}
+
+.s7__card-label.is-visible {
+  opacity: 1;
+}
+
+/* Fan carousel — JS handles all left/width/height per slot */
+.s7__fan {
+  position: absolute;
+  bottom: calc(140 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(1140 * var(--u));
+  height: calc(356 * var(--u));
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+}
+
+.s7__card {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #d0d0cc;
+  cursor: pointer;
+  overflow: hidden;
+  transition: left .55s var(--ease), width .55s var(--ease), height .55s var(--ease);
+}
+
+/* Play button — fades in when the card is at center */
+.s7__play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.15);
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.s7__card.is-center .s7__play {
+  opacity: 1;
+  pointer-events: auto;
+}
+.s7__play svg {
+  width: calc(32 * var(--u));
+  height: calc(32 * var(--u));
+  fill: white;
+}
+
+/* ---------------------------------------------------------------------
+   MERGE — second half sits above the fixed Three.js canvas (z-index 1)
+   and the hero/about stickies (z-index 2)
+   --------------------------------------------------------------------- */
+.s6, .s7 { position: relative; z-index: 3; }
+.s6 { background: var(--bg); scroll-snap-align: start; }
+.s7 { scroll-snap-align: start; }
+
+#section-seven { height: 100vh; position: relative; z-index: 3; scroll-snap-align: start; }

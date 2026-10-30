@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Beyond Concrete — Homepage prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="viewport">
+    <!-- 1440 × 900 design canvas, scaled to fit the window (js/main.js → fitStage) -->
+    <div class="stage" id="stage" data-scene="0">
+
+      <header class="site-header">
+        <button class="menu" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuPanel">
+          <span></span><span></span><span></span>
+        </button>
+        <a class="logo" href="#" aria-label="Beyond Concrete — home">
+          <img src="assets/logo.png" alt="Beyond Concrete" width="139" height="58">
+        </a>
+      </header>
+
+      <!-- Menu · wipes in from the left over everything but the header -->
+      <nav class="menu-panel" id="menuPanel" aria-label="Main menu" aria-hidden="true">
+        <a href="#" data-go="0"  style="--i:0; top:calc(var(--oy) + 236.65px)">HOME</a>
+        <a href="#" data-go="10" style="--i:1; top:calc(var(--oy) + 371.65px)">ABOUT</a>
+        <a href="#" data-go="8"  style="--i:2; top:calc(var(--oy) + 506.65px)">PROJECTS</a>
+        <a href="#" data-go="11" style="--i:3; top:calc(var(--oy) + 655.65px)">CONTACT</a>
+      </nav>
+
+      <!-- Scroll 1 · ATF: looping answers -->
+      <section class="scene scene-1" aria-label="Where does a home really end">
+        <p class="s1-question">Where does a home really end...</p>
+        <p class="s1-answers" aria-live="off">
+          <span class="s1-answer is-current">the neighbourhood?</span>
+          <span class="s1-answer">the city?</span>
+          <span class="s1-answer">the air outside?</span>
+        </p>
+      </section>
+
+      <!-- Scroll 2 -->
+      <section class="scene scene-2">
+        <p class="s2-text" data-split>Perhaps it doesn’t</p>
+      </section>
+
+      <!-- Scroll 3 · rotating ring of project cards -->
+      <section class="scene scene-3">
+        <div class="ring" id="ring" aria-hidden="true"></div>
+        <p class="s3-text" data-split>And that is why, to us, building a home<br>means looking beyond the walls.</p>
+        <div class="s3-cta"><a href="#">Explore all projects</a></div>
+      </section>
+
+      <!-- Scrolls 4–8 share the persistent .chapter layer below; these are step markers -->
+      <section class="scene scene-4" aria-label="Made to matter, by design"></section>
+      <section class="scene scene-5" aria-label="Beyond the sustainability"></section>
+      <section class="scene scene-6" aria-label="Beyond the architecture"></section>
+      <section class="scene scene-7" aria-label="Beyond the biodiversity"></section>
+      <section class="scene scene-8" aria-label="Beyond the engineering"></section>
+      <section class="scene scene-9" aria-label="Projects"></section>
+      <section class="scene scene-10" aria-label="One of one, by nature"></section>
+      <section class="scene scene-11" aria-label="Founder"></section>
+      <section class="scene scene-12" aria-label="Contact"></section>
+      <section class="scene scene-13" aria-label="Footer"></section>
+
+      <!-- Scrolls 9–12 + footer: a normal vertical page that scrolls in steps -->
+      <div class="track" id="track">
+
+        <!-- Scroll 9 · two projects, split down the middle -->
+        <section class="tsec split" id="split" data-at="8">
+          <div class="sp-panel sp-left" data-side="left">
+            <h2 class="sp-fifth rv">FIFTH<br>AVENUE</h2>
+            <p class="sp-floors rv" style="--d:1">45 Residential Floors.<br><b>An Architectural<br>Marvel.</b></p>
+            <a class="sp-explore sp-explore-left" href="#">Explore Project
+              <svg width="96" height="8" viewBox="0 0 96 8" aria-hidden="true"><path d="M0 4H95M91 1l4 3-4 3" fill="none" stroke="currentColor" stroke-width="1"/></svg></a>
+          </div>
+          <div class="sp-panel sp-right" data-side="right">
+            <div class="sp-right-shift">
+              <p class="sp-villa rv">A sustainable villa<br>community <b>rooted in<br>the future.</b></p>
+              <h2 class="sp-roots rv" style="--d:1">ROOTS</h2>
+            </div>
+            <a class="sp-explore sp-explore-right" href="#">Explore Project
+              <svg width="96" height="8" viewBox="0 0 96 8" aria-hidden="true"><path d="M0 4H95M91 1l4 3-4 3" fill="none" stroke="currentColor" stroke-width="1"/></svg></a>
+            <p class="sp-status"><span class="sp-dot"></span>150 days until completion</p>
+          </div>
+          <span class="sp-divider"></span>
+          <span class="sp-frame"></span>
+        </section>
+
+        <!-- Scroll 10 · One of One, with the drifting cards -->
+        <section class="tsec one" data-at="9">
+          <h2 class="one-title rv">One of One</h2>
+          <p class="one-by rv" style="--d:1">by nature</p>
+          <p class="one-intro rv" style="--d:2">Each of our developments is shaped by its place, its possibilities,<br>and what already exists there. Nothing is replicated for the sake of<br>it. Nothing is added simply for excess.</p>
+          <div class="carousel rv" id="carousel" style="--d:2">
+            <article class="c-card"><h3>In Tune With The Climate</h3><p>Thermally efficient construction for year-round comfort.</p></article>
+            <article class="c-card"><h3>Sunset to Sunrise</h3><p>Harnessing the sun, from first light to last.</p></article>
+            <article class="c-card"><h3>Infinity in The Finite</h3><p>Thoughtful water systems that respect every drop.</p></article>
+            <article class="c-card"><h3>Built to Breathe</h3><p>Cross-ventilation that keeps homes cool, naturally.</p></article>
+            <article class="c-card"><h3>Rooted in Place</h3><p>Native planting that belongs to the land it grows on.</p></article>
+          </div>
+          <p class="one-outro rv" style="--d:3">At Beyond Concrete, luxury is abundance<br>without waste.</p>
+        </section>
+
+        <!-- Scroll 11 · founder quote -->
+        <section class="tsec quote" data-at="10">
+          <svg class="q-mark rv" width="45" height="41" viewBox="0 0 45 41" aria-hidden="true">
+            <rect x="0"    y="15.5" width="4.5" height="25.5"/><rect x="7"    y="9"  width="4.5" height="32"/>
+            <rect x="13.5" y="0"    width="4.5" height="41"/>  <rect x="20"   y="9"  width="4.5" height="32"/>
+            <rect x="27"   y="17.5" width="4.5" height="23.5"/><rect x="33.5" y="5"  width="4.5" height="36"/>
+            <rect x="40.5" y="0"    width="4.5" height="41"/>
+          </svg>
+          <p class="q-kicker rv" style="--d:1">ONE MAN WITH A VISION FOR HIS CITY</p>
+          <blockquote class="q-text rv" style="--d:2">“Every building carries a responsibility.”</blockquote>
+          <p class="q-name rv" style="--d:3">JAYA PAVAN GUMMADI<br>FOUNDER &amp; MANAGING DIRECTOR</p>
+        </section>
+
+        <!-- Scroll 12 · contact -->
+        <section class="tsec contact" data-at="11">
+          <h2 class="ct-title rv">A thoughtful choice<br>deserves a thoughtful<br>conversation.</h2>
+          <p class="ct-sub rv" style="--d:1">Leave your details and our Customer<br>Delight Manager will take it from here.</p>
+          <form class="ct-form rv" style="--d:2" onsubmit="return false">
+            <label class="ct-label" style="top:578.5px" for="ct-name">NAME:</label>
+            <input class="ct-input" style="top:560px" id="ct-name" name="name" autocomplete="name">
+            <label class="ct-label" style="top:617.5px" for="ct-email">EMAIL:</label>
+            <input class="ct-input" style="top:599.5px" id="ct-email" name="email" type="email" autocomplete="email">
+            <span class="ct-help" style="top:632.75px">This will help us get in touch with you</span>
+            <label class="ct-label" style="top:658px" for="ct-note">NOTE:</label>
+            <input class="ct-input" style="top:638.5px" id="ct-note" name="note">
+            <span class="ct-help" style="top:671.25px">What would you like to discuss?</span>
+          </form>
+        </section>
+
+        <!-- Footer (450 tall) · black panel wipes in from the left -->
+        <footer class="tsec footer" data-at="12" id="footer">
+          <div class="ft-layer ft-base">
+            <nav class="ft-nav" aria-hidden="true">
+              <span style="left:121.5px; top:113.6px">WORK</span><span style="left:243px; top:113.6px">JOURNAL</span>
+              <span style="left:121.5px; top:145.6px">TEAM</span><span style="left:243.5px; top:145.6px">ABOUT US</span>
+              <span style="left:122.5px; top:181.1px">CONTACT</span><span style="left:243.5px; top:181.1px">CAREER</span>
+            </nav>
+            <span class="ft-bar"></span>
+            <p class="ft-q"><b>What if your next-door neighbour was 50 years old?</b></p>
+            <p class="ft-body">A 50-year-old peepal tree, carefully transplanted to put down<br>roots alongside you.</p>
+            <h2 class="ft-head">Towards<br>Thought-Led<br>Development</h2>
+          </div>
+          <!-- same copy in white, clipped to the black panel so text turns white as it passes -->
+          <div class="ft-layer ft-dark">
+            <nav class="ft-nav">
+              <a href="#" style="left:121.5px; top:113.6px">WORK</a><a href="#" style="left:243px; top:113.6px">JOURNAL</a>
+              <a href="#" style="left:121.5px; top:145.6px">TEAM</a><a href="#" style="left:243.5px; top:145.6px">ABOUT US</a>
+              <a href="#" style="left:122.5px; top:181.1px">CONTACT</a><a href="#" style="left:243.5px; top:181.1px">CAREER</a>
+            </nav>
+            <span class="ft-bar"></span>
+            <p class="ft-q"><b>What if your next-door neighbour was 50 years old?</b></p>
+            <p class="ft-body">A 50-year-old peepal tree, carefully transplanted to put down<br>roots alongside you.</p>
+          </div>
+        </footer>
+      </div>
+
+      <!-- Scrolls 4–8 · category bars that rise, then wipe across one by one -->
+      <div class="chapter" id="chapter">
+        <div class="chapter-inner">
+        <div class="ch-matter">
+          <p class="ch-matter-title">Made to Matter</p>
+          <p class="ch-matter-sub">By Design</p>
+        </div>
+        <p class="ch-walls">Beyond the walls</p>
+
+        <!-- --bar-l/--bar-r: the bar's column on the right · --final-l: where the panel stops
+             --inner-l: left edge of the inner rectangle · --label-x/--label-b: bar label position -->
+        <div class="cat cat-light" style="--bar-l:calc(var(--W) - 242px); --bar-r:calc(var(--W) - 180px); --final-l:0px;   --inner-l:205px; --label-x:calc(var(--W) - 209.75px); --label-b:72.5px;  z-index:1">
+          <div class="cat-inner"></div>
+          <h2 class="cat-title">Beyond the Sustainability</h2>
+          <p class="cat-sub">Systems designed to use less, conserve<br>more and give back where they can.</p>
+          <span class="cat-label">SUSTAINABILITY</span>
+          <span class="cat-strip" style="--strip-x:22.5px">SUSTAINABILITY</span>
+          <span class="cat-line"></span>
+        </div>
+
+        <div class="cat cat-dark" style="--bar-l:calc(var(--W) - 180px); --bar-r:calc(var(--W) - 118px); --final-l:48px;  --inner-l:216px; --label-x:calc(var(--W) - 147.75px); --label-b:286.5px; z-index:2">
+          <div class="cat-inner"></div>
+          <h2 class="cat-title">Beyond the Architecture</h2>
+          <p class="cat-sub">The way a building understands<br>orientation, proportion, views, and<br>ventilation.</p>
+          <span class="cat-label">ARCHITECTURE</span>
+          <span class="cat-strip" style="--strip-x:69.25px">ARCHITECTURE</span>
+          <span class="cat-line"></span>
+        </div>
+
+        <div class="cat cat-light" style="--bar-l:calc(var(--W) - 118px); --bar-r:calc(var(--W) - 63px); --final-l:91px;  --inner-l:216px; --label-x:calc(var(--W) - 88.75px); --label-b:527.5px; z-index:3">
+          <div class="cat-inner"></div>
+          <h2 class="cat-title">Beyond the Biodiversity</h2>
+          <p class="cat-sub">Gardens and edges planted to bring birds,<br>bees and shade back to the neighbourhood.</p>
+          <span class="cat-label">BIODIVERSITY</span>
+          <span class="cat-strip" style="--strip-x:110.25px">BIODIVERSITY</span>
+          <span class="cat-line"></span>
+        </div>
+
+        <div class="cat cat-dark" style="--bar-l:calc(var(--W) - 63px); --bar-r:var(--W); --final-l:137px; --inner-l:216px; --label-x:calc(var(--W) - 29.75px); --label-b:728px;   z-index:4">
+          <div class="cat-inner"></div>
+          <h2 class="cat-title">Beyond the Engineering</h2>
+          <p class="cat-sub">Structures that do more with less material,<br>built to last and simple to repair.</p>
+          <span class="cat-label">ENGINEERING</span>
+          <span class="cat-line"></span>
+        </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Beyond Concrete</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-snap-type: y mandatory; overflow-y: scroll; }
+        body { font-family: 'PartnerSerif', serif; background: #fff; }
+        section { scroll-snap-align: start; }
+        .subtitle, .img-caption { font-family: 'Nunito Sans', sans-serif; }
+
+        /* HERO ANIMATIONS */
+        .hero-left h1 span,
+        .hero-left .subtitle,
+        .hero-img-placeholder,
+        .hero-right .img-caption {
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        .hero-left h1 span.visible,
+        .hero-left .subtitle.visible,
+        .hero-img-placeholder.visible,
+        .hero-right .img-caption.visible {
+            opacity: 1;
+        }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh;
+            padding: 0 60px;
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            background-color: #d4d4d4;
+        }
+
+        .hero-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: fit-content;
+        }
+
+        .hero-left h1 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 500;
+            line-height: 1.1;
+            color: #111;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .hero-left .subtitle {
+            font-size: 20px;
+            color: #666;
+            /* max-width: 380px; */
+            line-height: 1.5;
+        }
+
+        .hero-right {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            width: 420px;
+        }
+
+        .hero-img-placeholder {
+            width: 420px;
+            height: 596px;
+            background: #999595;
+        }
+
+        .hero-right .img-caption {
+            font-size: 0.8rem;
+            color: #888;
+
+        }
+
+        /* PHILOSOPHY */
+        .philosophy {
+            position: relative;
+            height: 100vh;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        /* Philosophy entrance — initial states */
+        .phil-center {
+            opacity: 0;
+            transition: opacity 0.9s ease;
+        }
+        .phil-block-a,
+        .phil-block-b {
+            transform: translateX(-100vw);
+            transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .phil-block-c {
+            transform: translateX(100vw);
+            transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Triggered states */
+        .phil-center.phil-in {
+            opacity: 1;
+        }
+        .phil-block-a.phil-in,
+        .phil-block-b.phil-in,
+        .phil-block-c.phil-in {
+            transform: translateX(0);
+        }
+
+        /* --- the 4 independently placed blocks --- */
+
+        .phil-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            height: 440px;
+        }
+
+        /* all elements inside phil-center are absolutely placed */
+        .phil-center .word,
+        .phil-center .phil-subtitle {
+            position: absolute;
+            color: #111;
+            white-space: nowrap;
+        }
+
+        .phil-center .word-our {
+            font-size: 3.2rem;
+            font-style: italic;
+            font-weight: 400;
+            top: 124px;
+            left: 70px;
+        }
+
+        .phil-center .word-true {
+            font-size: 8.5rem;
+            font-weight: 400;
+            line-height: 1;
+            top: 134px;
+            left: 160px;
+        }
+
+        .phil-center .word-north {
+            font-size: 5rem;
+            font-style: italic;
+            font-weight: 400;
+            top: 239px;
+            left: 380px;
+        }
+
+        .phil-center .phil-subtitle {
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: normal;
+            width: 240px;
+            top: 121px;
+            left: 270px;
+        }
+
+        .phil-block-a {
+            position: absolute;
+            top: 160px;
+            left: 60px;
+            width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            background-color: #D9D9D9;
+            padding: 20px 32px;
+        }
+
+        .phil-block-b {
+            position: absolute;
+            bottom: 60px;
+            left: calc(50% - 240px);
+            width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            background-color: #D9D9D9;
+            padding: 20px 32px;
+        }
+
+        .phil-block-c {
+            position: absolute;
+            top: 100px;
+            right: 60px;
+            width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            background-color: #D9D9D9;
+            padding: 20px 32px;
+        }
+
+        /* TEAM */
+        .team-wrapper {
+            scroll-snap-align: start;
+        }
+
+        .team {
+            height: 100vh;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            box-sizing: border-box;
+            scroll-snap-align: none;
+        }
+
+        .team-heading {
+            font-family: 'PartnerSerif', serif;
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 400;
+            color: #111;
+            margin-bottom: 32px;
+            flex-shrink: 0;
+            margin-top: 12px;
+        }
+
+        .team-cols {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            gap: 40px;
+            min-height: 0;
+        }
+
+        .leader-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .leader-col.team-col-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .leader-col-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .leader-question {
+            font-family: 'PartnerSerif', serif;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            line-height: 1;
+        }
+
+        .leader-question .muted {
+            display: block;
+            color: #aaa;
+        }
+
+        .leader-question .bold {
+            display: block;
+            color: #111;
+            font-weight: 700;
+        }
+
+        .leader-linkedin {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+
+        .leader-linkedin svg {
+            width: 18px;
+            height: 18px;
+            fill: #111;
+        }
+
+        .leader-img {
+            flex: 1;
+            background: #d4d4d4;
+            min-height: 0;
+        }
+
+        .leader-col-foot {
+            padding-top: 20px;
+            flex-shrink: 0;
+        }
+
+        .leader-answer {
+            font-family: 'PartnerSerif', serif;
+            font-size: 1rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #111;
+            margin-bottom: 10px;
+        }
+
+        .leader-quote {
+            font-family: 'Nunito Sans', sans-serif;
+            font-style: italic;
+            font-size: 0.88rem;
+            color: #333;
+            line-height: 1.65;
+        }
+
+        .team-join {
+            background: #c8c8c8;
+            padding: 80px 60px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 60px;
+        }
+
+        .team-join-left {
+            flex: 1;
+        }
+
+        .team-join-left h2 {
+            font-family: 'PartnerSerif', serif;
+            font-size: clamp(2.4rem, 4.5vw, 4rem);
+            font-weight: 400;
+            color: #111;
+            margin-bottom: 12px;
+        }
+
+        .team-join-left .subtitle {
+            font-size: 1rem;
+            color: #111;
+        }
+
+        .team-join-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .team-join-right p {
+            font-size: 0.95rem;
+            color: #111;
+            font-family: 'Nunito Sans', sans-serif;
+            line-height: 1.6;
+        }
+
+        .team-join-btn {
+            width: 130px;
+            height: 36px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'PartnerSerif', serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #111;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.4s;
+        }
+
+        .team-join-btn:hover {
+            background-color: #111;
+            color: #fff;
+        }
+
+        /* SUSTAINABILITY */
+        .sustainability {
+            height: 200vh;
+        }
+
+        .sust-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            padding: 100px 60px;
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            gap: 60px;
+            overflow: hidden;
+        }
+
+        .sust-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sust-top {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sust-top h2 {
+            font-size: clamp(2.5rem, 4vw, 4rem);
+            font-weight: 500;
+            color: #111;
+            line-height: 1.1;
+        }
+
+        .sust-top .subtitle {
+            font-size: 0.95rem;
+            color: #666;
+            max-width: 420px;
+            line-height: 1.6;
+        }
+
+        .sust-body {
+            font-size: 1.7rem;
+            font-family: 'Nunito Sans', sans-serif;
+            color: #111;
+            line-height: 1.2;
+            max-width: 480px;
+        }
+
+        .sust-right {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            position: relative;
+        }
+
+        .sust-img-wrap {
+            position: relative;
+            line-height: 0;
+            z-index: 1;
+        }
+
+        .sust-img-current {
+            display: block;
+            max-width: 100%;
+        }
+
+        .sust-img-next {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0;
+        }
+
+        @keyframes sust-float-a {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-8px); }
+        }
+        @keyframes sust-float-b {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-6px); }
+        }
+
+        .sust-float-text {
+            position: absolute;
+            font-family: 'PartnerSerif', serif;
+            font-style: italic;
+            font-size: 1rem;
+            color: #111;
+            line-height: 1.4;
+            pointer-events: auto;
+            cursor: default;
+            opacity: 0;
+            transition: opacity 1.2s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .sust-float-text.sust-in {
+            opacity: 1;
+        }
+        .sust-float-text-a {
+            top: 28%;
+            right: 8%;
+            z-index: 2;
+            animation: sust-float-a 5s ease-in-out infinite;
+        }
+        .sust-float-text-b {
+            bottom: 28%;
+            left: 2%;
+            z-index: 2;
+            animation: sust-float-b 6s ease-in-out infinite;
+            animation-delay: 1.2s;
+        }
+        .sust-float-text:hover {
+            transform: translateY(-10px);
+            animation-play-state: paused;
+        }
+
+        /* State 2 image labels */
+        .sust-img-label {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 2;
+            background: #fff;
+            padding: 10px 14px;
+        }
+        .sust-img-label.sust-label-in {
+            opacity: 1;
+        }
+        .sust-img-label-plus {
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #111;
+            line-height: 1;
+        }
+        .sust-img-label-text {
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #111;
+            line-height: 1.3;
+            padding-left: 2px;
+        }
+        .sust-img-label-a {
+            top: calc(14% + 120px);
+            left: 6%;
+        }
+        .sust-img-label-b {
+            bottom: 10%;
+            right: 4%;
+        }
+
+        /* Sustainability entrance — initial states */
+        .sust-top h2,
+        .sust-img-wrap {
+            opacity: 0;
+            transform: translateY(32px);
+        }
+
+        .sust-top h2 {
+            transition: opacity 1.4s ease, transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .sust-img-wrap {
+            transition: opacity 2.4s ease, transform 2.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .sust-top h2.sust-in,
+        .sust-img-wrap.sust-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sust-line {
+            display: block;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .sust-line.sust-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sust-strike-word {
+            position: relative;
+            display: inline-block;
+        }
+
+        .sust-strike-word::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 0;
+            height: 1.5px;
+            background: #666;
+            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .sust-strike-word.striking::after {
+            width: 100%;
+        }
+
+        /* State 1 → State 2 content swap */
+        .sust-state-1 {
+            transition: opacity 0.6s ease;
+        }
+
+        .sust-state-2 {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            transition: opacity 0.7s ease;
+        }
+
+        .sust-subtitle-wrap {
+            position: relative;
+        }
+
+        .sust-bottom {
+            position: relative;
+        }
+
+        /* state-1 fade out */
+        .sust-state-1.sust-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* state-2 containers fade in */
+        .sust-state-2.sust-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* question list items — each fades in individually */
+        .sust-questions li {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .sust-questions li.sust-q-in {
+            opacity: 1;
+        }
+
+        /* State 2 subtitle */
+        .sust-subtitle-2 {
+            font-family: 'PartnerSerif', serif;
+            font-size: 28px;
+            color: #111;
+            line-height: 1.4;
+        }
+
+        /* Question list */
+        .sust-questions {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow: hidden;
+        }
+
+        .sust-questions li {
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            line-height: 2;
+        }
+
+        .sust-questions li:nth-child(1) { color: #333; }
+        .sust-questions li:nth-child(2) { color: #777; }
+        .sust-questions li:nth-child(3) { color: #aaa; }
+        .sust-questions li:nth-child(4) { color: #ccc; }
+
+        /* ── Ekam Section ─────────────────────────────────────────── */
+        .ekam-section {
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+            background: #d4d4d4;
+            scroll-snap-align: start;
+        }
+
+        .ekam-card {
+            width: 44%;
+            flex-shrink: 0;
+            background: #fff;
+            padding: 60px 60px;
+            margin: 100px 0 60px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .ekam-card-top {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .ekam-title {
+            font-family: 'PartnerSerif', serif;
+            font-size: clamp(2rem, 3.2vw, 3rem);
+            font-weight: 400;
+            color: #111;
+            line-height: 1.1;
+        }
+
+        .ekam-desc {
+            font-family: 'PartnerSerif', serif;
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.65;
+            max-width: 480px;
+        }
+
+        .ekam-stats {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ekam-stat {
+            border-top: 1px solid #ccc;
+            padding: 20px 0;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .ekam-stat.ekam-stat-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .ekam-stat-label {
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .ekam-stat-desc {
+            font-family: 'PartnerSerif', serif;
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.55;
+        }
+
+        .ekam-right {
+            flex: 1;
+            position: relative;
+        }
+
+        .ekam-img-label {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #777;
+        }
+
+        /* Card entrance */
+        .ekam-card {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1s ease, transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .ekam-card.ekam-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Work Behind the Words ─────────────────────────────────── */
+        .work-section {
+            background: #d4d4d4;
+            padding: 80px 60px 100px;
+            scroll-snap-align: start;
+        }
+
+        .work-heading {
+            font-family: 'PartnerSerif', serif;
+            font-size: clamp(2.4rem, 4.5vw, 4rem);
+            font-weight: 400;
+            color: #111;
+            line-height: 1.15;
+            margin-bottom: 60px;
+            white-space: nowrap;
+            margin-top: 20px;
+        }
+
+        .work-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0 48px;
+        }
+
+        .work-col {
+            border-top: 1px solid #999;
+            padding-top: 20px;
+        }
+
+        .work-col-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .work-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #333;
+            flex-shrink: 0;
+        }
+
+        .work-col-label {
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #111;
+        }
+
+        .work-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .work-list li {
+            font-family: 'PartnerSerif', serif;
+            font-size: 1rem;
+            color: #222;
+            line-height: 1.6;
+        }
+
+        .work-list li::before {
+            content: '· ';
+            color: #555;
+        }
+
+        /* ── FAQ ───────────────────────────────────────────────────── */
+        .faq-section {
+            background: #fff;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            padding: 80px 60px 100px;
+            gap: 80px;
+            scroll-snap-align: start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .faq-left {
+            width: 410px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-self: stretch;
+        }
+
+        .faq-left-top h2 {
+            font-family: 'PartnerSerif', serif;
+            font-size: 3.5rem;
+            font-weight: 400;
+            color: #111;
+            margin-bottom: 16px;
+        }
+
+        .faq-left-top p {
+            font-family: 'PartnerSerif', serif;
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .faq-img-placeholder {
+            width: 220px;
+            height: 220px;
+            background: #d4d4d4;
+        }
+
+        .faq-right {
+            flex: 1;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            margin-left: auto;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #ccc;
+        }
+
+        .faq-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 0;
+            cursor: pointer;
+            gap: 24px;
+        }
+
+        .faq-question-text {
+            font-family: 'PartnerSerif', serif;
+            font-size: 1.15rem;
+            color: #111;
+            line-height: 1.4;
+        }
+
+        .faq-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 300;
+            color: #111;
+            line-height: 1;
+            padding: 0;
+            flex-shrink: 0;
+            width: 24px;
+            text-align: center;
+        }
+
+        .faq-answer {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .faq-answer-inner {
+            overflow: hidden;
+        }
+
+        .faq-answer p {
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 0.9rem;
+            color: #444;
+            line-height: 1.7;
+            padding-bottom: 24px;
+            max-width: 560px;
+        }
+
+        .faq-item.faq-open .faq-answer {
+            grid-template-rows: 1fr;
+        }
+
+        /* ── Contact + Footer layout (inject-contact-footer.js provides the rest) ── */
+        #section-seven {
+            height: 100vh;
+            position: relative;
+            scroll-snap-align: start;
+        }
+
+        /* shared small label style */
+        .phil-label {
+            font-size: 24px;
+            text-transform: uppercase;
+            /* letter-spacing: 0.08em; */
+            color: #000;
+            font-family: 'PartnerSerif', serif;
+        }
+
+    </style>
+</head>
+<body>
+
+    <section class="hero">
+        <div class="hero-left">
+            <h1><span>the</span><span>bare bones</span><span>are simple.</span></h1>
+            <p class="subtitle">We are real estate company co-founded by JP Gummadi and Arjun Reddy in 2026.</p>
+        </div>
+        <div class="hero-right">
+            <div class="hero-img-placeholder"></div>
+            <p class="img-caption" style="text-transform: uppercase;">Can real estate go beyond constructing buildings to creating healthier, more responsible habitats for people and the planet?</p>
+        </div>
+    </section>
+
+    <section class="philosophy">
+
+        <!-- CENTER — each element placed independently -->
+        <div class="phil-center">
+            <span class="word word-our">our</span>
+            <p class="phil-subtitle">We see ourselves as developers but also as students of the city.</p>
+            <span class="word word-true">true</span>
+            <span class="word word-north">north</span>
+        </div>
+
+        <!-- BLOCK A — top left, text block -->
+        <div class="phil-block-a">
+            <p class="phil-label">PEOPLE FIRST</p>
+            <p class="subtitle">From discovery to inhabiting, the delight of our customers matters deeply to us. We are building a people-first ecosystem and designing spaces that are meaningful to those who inhabit them.</p>
+        </div>
+
+        <!-- BLOCK B — bottom left -->
+        <div class="phil-block-b">
+            <p class="phil-label">PLANET-CONSCIOUS</p>
+            <p class="subtitle">We choose materials with care, looking for ways to lessen the environmental impact while creating spaces built for longevity.</p>
+        </div>
+
+        <!-- BLOCK C — top right -->
+        <div class="phil-block-c">
+            <p class="phil-label">BEYOND OWNERSHIP</p>
+            <p class="subtitle">Real estate doesn't end with ownership of square footage. It extends to accountability for the footprint development leaves behind.</p>
+        </div>
+
+    </section>
+
+    <div class="team-wrapper">
+    <section class="team">
+
+        <h2 class="team-heading">Our Leadership</h2>
+
+        <div class="team-cols">
+
+            <div class="leader-col">
+                <div class="leader-col-head">
+                    <div class="leader-question">
+                        <span class="muted">WHAT IS</span>
+                        <span class="bold">JAYA PAVAN'S</span>
+                        <span class="muted">BEYOND?</span>
+                    </div>
+                    <a class="leader-linkedin" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.4 20.4h-3.6v-5.6c0-1.3 0-3-1.8-3-1.9 0-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.8 3.3-1.8 3.5 0 4.2 2.3 4.2 5.4v6.2zM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2zM7.1 20.4H3.5V9h3.6v11.4zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.5C0 23.2.8 24 1.8 24h20.4c1 0 1.8-.8 1.8-1.8V1.7C24 .8 23.2 0 22.2 0z"/></svg></a>
+                </div>
+                <div class="leader-img"></div>
+                <div class="leader-col-foot">
+                    <p class="leader-answer">Delight.</p>
+                    <p class="leader-quote">Going beyond means creating experiences that leave people genuinely delighted. Our focus on branding, executive management and administration is shaped by my belief in "people's delight" and "strong financial discipline" as key drivers of success in real estate. With experience across sales, recruitment and co-working startups, he brings a customer-first perspective to the business.</p>
+                </div>
+            </div>
+
+            <div class="leader-col">
+                <div class="leader-col-head">
+                    <div class="leader-question">
+                        <span class="muted">WHAT IS</span>
+                        <span class="bold">ARJUN REDDY'S</span>
+                        <span class="muted">BEYOND?</span>
+                    </div>
+                    <a class="leader-linkedin" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.4 20.4h-3.6v-5.6c0-1.3 0-3-1.8-3-1.9 0-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.8 3.3-1.8 3.5 0 4.2 2.3 4.2 5.4v6.2zM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2zM7.1 20.4H3.5V9h3.6v11.4zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.5C0 23.2.8 24 1.8 24h20.4c1 0 1.8-.8 1.8-1.8V1.7C24 .8 23.2 0 22.2 0z"/></svg></a>
+                </div>
+                <div class="leader-img"></div>
+                <div class="leader-col-foot">
+                    <p class="leader-answer">Legacy.</p>
+                    <p class="leader-quote">For Arjun, going beyond means creating something that stands the test of time. With two decades of experience in construction, he has successfully delivered residential projects and overseen layout development across multiple cities. His expertise in operations, delivery and partnerships brings clarity to every project and helps navigate complex challenges.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Join Our Team -->
+    <div class="team-join">
+        <div class="team-join-left">
+            <h2>Join Our Team</h2>
+            <p class="subtitle">We scale with purpose.</p>
+        </div>
+        <div class="team-join-right">
+            <p>If your true north aligns with ours, write in with your experience, the role you're seeking, and what you can bring beyond the expected.</p>
+            <a class="team-join-btn" href="#section-seven">Contact Us</a>
+        </div>
+    </div>
+    </div><!-- /.team-wrapper -->
+
+    <section class="sustainability">
+        <div class="sust-sticky">
+
+            <div class="sust-left">
+
+                <!-- heading stays throughout -->
+                <div class="sust-top">
+                    <h2>Sustainability</h2>
+
+                    <!-- State 1 & 2 subtitle wrapper -->
+                    <div class="sust-subtitle-wrap">
+                        <div class="sust-state-1">
+                            <p class="subtitle">
+                                <span class="sust-line">You might have seen this word around—in writing, in practice, and in conversations about the future.</span>
+                                <span class="sust-line">For us, sustainability is etched into our everyday <span class="sust-strike-word">practices.</span></span>
+                            </p>
+                        </div>
+
+                        <!-- State 2 subtitle -->
+                        <div class="sust-state-2">
+                            <p class="sust-subtitle-2">isn't an arbitrary statement<br>or something added as an afterthought.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- State 1 body -->
+                <div class="sust-bottom">
+                    <p class="sust-body sust-state-1">
+                        <span class="sust-line">Nature plays a part that is intrinsic in how we imagine a home,</span>
+                        <span class="sust-line">and that same relationship with nature finds its place</span>
+                        <span class="sust-line">in all our development projects.</span>
+                    </p>
+
+                    <!-- State 2 questions -->
+                    <ul class="sust-questions sust-state-2">
+                        <li>WHICH MATERIALS SHOULD WE USE?</li>
+                        <li>HOW MUCH WATER WILL BE USED?</li>
+                        <li>HOW MUCH WASTE WILL BE GENERATED?</li>
+                        <li>HOW MUCH ENERGY DOES IT NEED?</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="sust-right">
+                <p class="sust-float-text sust-float-text-a sust-state-1">a sun above it and<br>a tree beside it.</p>
+                <p class="sust-float-text sust-float-text-b sust-state-1">Remember the first<br>home you ever drew?</p>
+                <div class="sust-img-label sust-img-label-a">
+                    <span class="sust-img-label-plus">+</span>
+                    <span class="sust-img-label-text">POROTHEM BRICKS</span>
+                </div>
+                <div class="sust-img-label sust-img-label-b">
+                    <span class="sust-img-label-plus">+</span>
+                    <span class="sust-img-label-text">RECLAIMED TIMBER</span>
+                </div>
+                <div class="sust-img-wrap">
+                    <img class="sust-img-current" src="sus.png" alt="Sustainability">
+                    <img class="sust-img-next" src="" aria-hidden="true">
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Ekam Section -->
+    <section class="ekam-section">
+        <div class="ekam-card">
+            <div class="ekam-card-top">
+                <h2 class="ekam-title">Prosperiti Homes Ekam</h2>
+                <p class="ekam-desc">Thoughtful planning, design and engineering, with attention to the details that may not always be immediately visible to a homebuyer. Thoughtful planning, design and engineering, with attention to the details that may not always be immediately visible to a homebuyer.</p>
+            </div>
+            <div class="ekam-stats">
+                <div class="ekam-stat">
+                    <p class="ekam-stat-label">35,000 sq. ft &nbsp; CLUBHOUSE</p>
+                    <p class="ekam-stat-desc">Amenities such as an outdoor theatre, trampoline park, pet park and co-working facilities.</p>
+                </div>
+                <div class="ekam-stat">
+                    <p class="ekam-stat-label">468 HOMES with 93 FLATS PER ACRE DENSITY</p>
+                    <p class="ekam-stat-desc">reflecting a defined residential density.</p>
+                </div>
+                <div class="ekam-stat">
+                    <p class="ekam-stat-label">7.4 kW EV CHARGING STATIONS</p>
+                    <p class="ekam-stat-desc">EV charging provision<br>of per apartment.</p>
+                </div>
+            </div>
+        </div>
+        <div class="ekam-right">
+            <span class="ekam-img-label">Full Width Image</span>
+        </div>
+    </section>
+
+    <!-- Work Behind the Words — no snap, natural height -->
+    <div class="work-section">
+        <h2 class="work-heading">The Work Behind the Words</h2>
+
+        <div class="work-grid">
+
+            <div class="work-col">
+                <div class="work-col-header">
+                    <span class="work-dot"></span>
+                    <span class="work-col-label">Material</span>
+                </div>
+                <ul class="work-list">
+                    <li>Porotherm Bricks</li>
+                    <li>Compressed Stabilised Earth Blocks</li>
+                    <li>Low-VOC Materials</li>
+                </ul>
+            </div>
+
+            <div class="work-col">
+                <div class="work-col-header">
+                    <span class="work-dot"></span>
+                    <span class="work-col-label">Energy</span>
+                </div>
+                <ul class="work-list">
+                    <li>Solar Energy Systems</li>
+                    <li>Rainwater Harvesting</li>
+                    <li>Wastewater Treatment &amp; Reuse</li>
+                    <li>Water-Efficient Fixtures &amp; Systems</li>
+                </ul>
+            </div>
+
+            <div class="work-col">
+                <div class="work-col-header">
+                    <span class="work-dot"></span>
+                    <span class="work-col-label">Landscape</span>
+                </div>
+                <ul class="work-list">
+                    <li>EV Charging Infrastructure</li>
+                    <li>Landscape &amp; Biodiversity</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-section">
+
+        <div class="faq-left">
+            <div class="faq-left-top">
+                <h2>Nothing Hidden in the Fine Print</h2>
+                <p>In the spaces we design and the way we work</p>
+            </div>
+            <div class="faq-img-placeholder"></div>
+        </div>
+
+        <div class="faq-right">
+
+            <div class="faq-item faq-open">
+                <div class="faq-question">
+                    <span class="faq-question-text">Is this your first venture in real estate?</span>
+                    <button class="faq-toggle">×</button>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>No. Beyond Concrete was founded on years of design and development work across residential and commercial projects. Ekam is our most considered project to date — but it carries the weight of everything we’ve learned before it.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-text">Are you an architecture studio or a real estate company?</span>
+                    <button class="faq-toggle">+</button>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>Neither entirely, and both in practice. We design the buildings we develop — which means the same team that draws the section also makes decisions about materials, density, and what gets built at all. That overlap is intentional.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-text">Why are you called Beyond Concrete?</span>
+                    <button class="faq-toggle">+</button>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>Because buildings are more than their structure. The name is a reminder — to us as much as anyone — that what we build should outlast its materials: in quality, in community, and in the way it sits on the land.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-text">What does IGBC recognition mean for a building?</span>
+                    <button class="faq-toggle">+</button>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>The Indian Green Building Council evaluates projects across energy use, water efficiency, materials, and indoor air quality. Recognition means a building has met independently verified standards — not just internal claims. Ekam holds a Platinum rating.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-text">How does living in a green building benefit me?</span>
+                    <button class="faq-toggle">+</button>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>Lower electricity and water bills, better natural light and ventilation, and materials that don't degrade your air quality over time. Green buildings also tend to age better — less maintenance, stronger resale value, and a quieter, more comfortable interior.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-text">Where can I learn more about your projects?</span>
+                    <button class="faq-toggle">+</button>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>Visit our Projects page for detailed documentation on each development — site context, design rationale, sustainability credentials, and availability. You're also welcome to reach out directly; we're happy to walk you through anything in person.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../shared/inject-header.js"></script>
+    <script src="../shared/inject-contact-footer.js"></script>
+
+    <script src="site.js"></script>
+</body>
+</html>

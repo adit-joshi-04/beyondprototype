@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roots</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #d2d2d2;
+            color: #0f0f0f;
+            overflow: hidden;
+        }
+
+        /* Three.js canvas — fixed, full viewport, behind everything */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .section {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        /* ─── Nav Panel ────────────────────────────────── */
+        #nav-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 199;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        #nav-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #nav-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 50vw;
+            height: 100vh;
+            background: #d2d2d2;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 90px;
+        }
+
+        #nav-panel.is-open {
+            transform: translateX(0);
+        }
+
+        #nav-close {
+            position: absolute;
+            top: 24px;
+            left: 43px;
+            font-size: 22px;
+            font-weight: 300;
+            line-height: 1;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #0f0f0f;
+            padding: 2px;
+        }
+
+        .nav-item {
+            display: block;
+            font-family: Georgia, serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #0f0f0f;
+            text-decoration: none;
+            line-height: 1.35;
+        }
+
+        .nav-item.nav-current,
+        .nav-sub a.nav-current {
+            color: #888;
+        }
+
+        .nav-sub {
+            padding-left: 36px;
+            margin-bottom: 2px;
+        }
+
+        .nav-sub a {
+            display: block;
+            font-family: Georgia, serif;
+            font-size: 16px;
+            color: #0f0f0f;
+            text-decoration: none;
+            line-height: 1.9;
+        }
+
+        /* ─── Header ──────────────────────────────────── */
+        #main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            padding: 26px 45px;
+        }
+
+        .header-hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .header-hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #0f0f0f;
+        }
+
+        .header-logo {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .header-logo img {
+            height: 36px;
+            width: auto;
+            display: block;
+        }
+
+        .header-enquire {
+            margin-left: auto;
+            font-family: 'Inter', sans-serif;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            background-color: #999;
+            padding: 8px 12px;
+            color: #333;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* ─── Hero Section ────────────────────────────── */
+        #hero {
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Every text element is individually positioned by JS.
+           Hidden until JS has set their left values (prevents flash). */
+        .title-word {
+            position: absolute;
+            opacity: 0;
+            font-family: Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(90px, 8.5vw, 200px);
+            line-height: 0.88;
+            color: #0f0f0f;
+            white-space: nowrap;
+        }
+
+        #hero-subtitle {
+            position: absolute;
+            opacity: 0;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 16px;
+            line-height: 1;
+            color: #222;
+        }
+
+        .hero-desc-line {
+            position: absolute;
+            opacity: 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.55;
+            color: #222;
+            white-space: nowrap;
+        }
+
+        .hero-desc-line strong {
+            font-weight: 700;
+        }
+
+        /* Vertical divider line */
+        #hero-line {
+            position: absolute;
+            width: 1px;
+            height: 100vh;
+            background: #0f0f0f;
+            top: 0;
+            opacity: 0;
+        }
+
+        /* ─── Section Two (horizontal scroll) ────── */
+
+        /* Fixed overlay — fades in during postHeroTl phase 1 */
+        #section-two {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* Clip window — bottom strip, same margin constants as hero.
+           Height mirrors reference: 100vh - 115 (TITLE_TOP) - 52 (DESC_BOTTOM) */
+        #s2-content {
+            position: absolute;
+            left: 45px;
+            right: 45px;
+            bottom: 52px;
+            height: calc(100vh - 167px);
+            overflow: hidden;
+        }
+
+        /* Wide horizontal strip — GSAP translates this LEFT as camera pans left */
+        #s2-inner {
+            display: flex;
+            flex-direction: row;
+            height: 100%;
+        }
+
+        /* Each item = 65vw wide — narrower slots so all 4 fit within ~2× viewport
+           of strip travel, letting the scroll feel slower without losing item 4. */
+        .s2-item {
+            width: 65vw;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-left: 40vw;
+            padding-top: 32px;
+            flex-shrink: 0;
+        }
+
+        /* Tether line — sits below the body text inside each item.
+           flex: 1 makes it fill all remaining height in the slot, so it
+           reaches from the text down to the bottom of the clip window,
+           pointing toward the house below. Grows top→bottom via scaleY. */
+        .s2-tether-line {
+            width: 1px;
+            height: 160px;
+            background: #0f0f0f;
+            transform-origin: top center;
+            transform: scaleY(0);
+            margin-top: 20px;
+        }
+
+        .s2-heading {
+            font-family: Georgia, serif;
+            font-size: 32px;
+            font-weight: 600;
+            color: #0f0f0f;
+            margin-bottom: 11px;
+            opacity: 0;
+        }
+
+        .s2-body {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.72;
+            color: #333;
+            max-width: 480px;
+            opacity: 0;
+        }
+
+        /* ─── Section Three ──────────────────────────── */
+
+        #section-three {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        #s3-left {
+            width: 50%;
+            height: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            padding: 115px 48px 52px 45px;
+            flex-shrink: 0;
+            pointer-events: auto;
+        }
+
+        #s3-heading {
+            font-family: Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(30px, 3vw, 52px);
+            line-height: 1.1;
+            color: #0f0f0f;
+            margin-bottom: 44px;
+        }
+
+        #s3-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            row-gap: 28px;
+            margin-bottom: 44px;
+        }
+
+        .s3-stat-col {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .s3-stat-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 10.5px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            color: #777;
+            text-transform: uppercase;
+        }
+
+        .s3-stat-value {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f0f0f;
+            line-height: 1.45;
+        }
+
+        #s3-accordion {
+            border-top: 1px solid #0f0f0f;
+            border-bottom: 1px solid #0f0f0f;
+        }
+
+        .s3-acc-item {
+            padding: 17px 12px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .s3-acc-item:last-child {
+            border-bottom: none;
+        }
+
+        .s3-acc-item:hover,
+        .s3-acc-item.s3-acc-active {
+            background: #e4e4e4;
+        }
+
+        .s3-acc-label {
+            font-family: Georgia, serif;
+            font-size: 20px;
+            color: #0f0f0f;
+        }
+
+        #s3-footer-text {
+            margin-top: auto;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            line-height: 1.68;
+            color: #555;
+            max-width: 400px;
+        }
+
+        #s3-right {
+            width: 50%;
+            height: 100%;
+            background: #d2d2d2;
+            flex-shrink: 0;
+        }
+
+        /* ─── Section Four ──────────────────────────── */
+
+        #section-four {
+            position: fixed;
+            inset: 0;
+            z-index: 3;
+            background: #ffffff;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        #s4-line-top {
+            position: absolute;
+            top: 115px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #0f0f0f;
+        }
+
+        #s4-accordion {
+            position: absolute;
+            top: 116px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .s4-item {
+            position: relative;
+            border-top: 1px solid #0f0f0f;
+            overflow: hidden;
+            cursor: pointer;
+            flex-shrink: 0;
+            pointer-events: auto;
+        }
+
+        .s4-item:last-child {
+            border-bottom: 1px solid #0f0f0f;
+        }
+
+        .s4-item-label-wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 28%;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 45px;
+            z-index: 1;
+        }
+
+        .s4-item-label {
+            font-family: Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(18px, 1.9vw, 26px);
+            color: #0f0f0f;
+            white-space: nowrap;
+        }
+
+        .s4-item-grey {
+            position: absolute;
+            top: 64px;
+            bottom: 0;
+            left: 28%;
+            right: 28%;
+            background: #d2d2d2;
+        }
+
+        .s4-item-right {
+            position: absolute;
+            top: 64px;
+            bottom: 0;
+            left: 74%;
+            right: 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 18px 0;
+        }
+
+        .s4-item-desc {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            line-height: 1.68;
+            color: #333;
+        }
+
+        .s4-item-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .s4-stat-col {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .s4-stat-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 10.5px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            color: #777;
+            text-transform: uppercase;
+        }
+
+        .s4-stat-value {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f0f0f;
+        }
+
+        /* ─── Section Five ──────────────────────────── */
+
+        #section-five {
+            position: fixed;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        #s5-box {
+            position: absolute;
+            inset: 0;
+            background: #d2d2d2;
+        }
+
+        #s5-label {
+            position: absolute;
+            top: 58px;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #888;
+            opacity: 0;
+        }
+
+        #s5-title-top,
+        #s5-title-bottom {
+            position: absolute;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: Georgia, serif;
+            font-weight: 900;
+            font-size: clamp(58px, 7.5vw, 108px);
+            line-height: 1;
+            color: #0f0f0f;
+            opacity: 0;
+        }
+
+        #s5-title-top    { bottom: 68%; }
+        #s5-title-bottom { top: 68%; }
+
+        #s5-body {
+            position: absolute;
+            top: 84%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(460px, 80vw);
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            line-height: 1.72;
+            color: #333;
+            opacity: 0;
+        }
+
+        /* ─── Section Six ───────────────────────────── */
+
+        #section-six {
+            position: fixed;
+            inset: 0;
+            z-index: 6;
+            background: #ffffff;
+            visibility: hidden;
+        }
+
+        #s6-heading {
+            position: absolute;
+            top: 115px;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: Georgia, serif;
+            font-weight: 500;
+            font-size: clamp(24px, 4vw, 52px);
+            color: #0f0f0f;
+            line-height: 1;
+        }
+
+        #s6-map-wrap {
+            position: absolute;
+            top: 258px;
+            bottom: 148px;
+            left: 6%;
+            right: 6%;
+        }
+
+        #s6-map {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-pin {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            cursor: default;
+        }
+
+        .map-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #0f0f0f;
+            box-shadow: 0 0 0 3px rgba(15, 15, 15, 0.12);
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .map-pin:hover .map-dot {
+            transform: scale(1.5);
+        }
+
+        .map-pin-card {
+            margin-bottom: 10px;
+            width: 168px;
+            background: #ffffff;
+            border: 1px solid #e2e2e2;
+            padding: 13px 15px 14px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(5px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .map-pin:hover .map-pin-card {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .map-pin-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .map-pin-title {
+            font-family: Georgia, serif;
+            font-size: 14px;
+            color: #0f0f0f;
+            margin-bottom: 9px;
+            line-height: 1.2;
+        }
+
+        .map-pin-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border-top: 1px solid #ebebeb;
+            padding-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .map-pin-features li {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            color: #555;
+            line-height: 1.4;
+            padding-left: 10px;
+            position: relative;
+        }
+
+        .map-pin-features li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: #bbb;
+        }
+
+        #s6-body {
+            position: absolute;
+            bottom: 52px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(480px, 80vw);
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            line-height: 1.72;
+            color: #555;
+        }
+
+        /* ─── Section Seven — Footer ──────────────────────── */
+
+        @property --fw {
+            syntax: '<length>';
+            inherits: true;
+            initial-value: 0px;
+        }
+
+        #section-seven {
+            position: fixed;
+            inset: 0;
+            z-index: 7;
+            visibility: hidden;
+            background: #ffffff;
+            --fw: 0px;
+            transition: --fw 1.6s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        #section-seven.is-in {
+            --fw: calc(100vw - 392.5px);
+            transition-delay: 0.45s;
+        }
+
+        #s7-contact {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            display: flex;
+            align-items: center;
+            padding: 0 6%;
+            gap: 8%;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .ct-left {
+            flex: 0 0 36%;
+        }
+
+        .ct-title {
+            font-family: Georgia, serif;
+            font-weight: 700;
+            font-size: clamp(26px, 2.4vw, 52px);
+            line-height: 1.1;
+            color: #0f0f0f;
+            margin-bottom: 18px;
+        }
+
+        .ct-sub {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.65;
+            color: #555;
+        }
+
+        .ct-form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ct-field {
+            display: flex;
+            align-items: flex-start;
+            padding: 18px 0 8px;
+        }
+
+        .ct-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            color: #888;
+            flex: 0 0 64px;
+            padding-top: 3px;
+        }
+
+        .ct-input-wrap {
+            flex: 1;
+        }
+
+        .ct-input {
+            display: block;
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #0f0f0f;
+            background: transparent;
+            font-family: Georgia, serif;
+            font-size: 15px;
+            color: #0f0f0f;
+            padding: 0 0 6px;
+            outline: none;
+        }
+
+        .ct-input:focus {
+            border-bottom-width: 2px;
+        }
+
+        .ct-submit {
+            align-self: flex-end;
+            margin-top: 24px;
+            padding: 10px 28px;
+            background: #0f0f0f;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+        }
+
+        .ct-submit:hover {
+            background: #333;
+        }
+
+        .ct-help {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            color: #c2c2c2;
+            margin-top: 5px;
+        }
+
+        #s7-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+        }
+
+        .ft-layer {
+            position: absolute;
+            inset: 0;
+        }
+
+        .ft-dark {
+            background: #0f0f0f;
+            color: #ffffff;
+            clip-path: inset(0 calc(100vw - var(--fw)) 0 0);
+        }
+
+        .ft-nav > * {
+            position: absolute;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 14px;
+            color: inherit;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .ft-nav a:hover {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .ft-bar {
+            position: absolute;
+            left: 460px;
+            top: 114.5px;
+            width: 7px;
+            height: 94px;
+            background: #939393;
+        }
+
+        .ft-q,
+        .ft-body {
+            position: absolute;
+            left: 480px;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 17px;
+            white-space: nowrap;
+        }
+
+        .ft-q    { top: 112.4px; }
+        .ft-body { top: 146.4px; }
+
+        .ft-head {
+            position: absolute;
+            left: calc(100vw - 396px);
+            top: 143.25px;
+            margin: 0;
+            font-family: Georgia, serif;
+            font-size: 48px;
+            line-height: 55px;
+            font-weight: 700;
+            white-space: nowrap;
+            color: #0f0f0f;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ─── Fixed Header ─────────────────────────────── -->
+    <header id="main-header">
+        <div class="header-hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <span class="header-enquire">Enquire</span>
+    </header>
+
+    <!-- Nav Overlay + Panel -->
+    <div id="nav-overlay"></div>
+    <div id="nav-panel">
+        <button id="nav-close">&#x2715;</button>
+        <nav>
+            <span class="nav-item" style="color: #b2b2b28d">Home</span>
+            <a class="nav-item" href="https://beyond-about.netlify.app/">About</a>
+            <div class="nav-item">Work
+                <div class="nav-sub">
+                    <a href="https://fifth-avenue-beyond.netlify.app/">Fifth Avenue</a>
+                    <a class="nav-current" href="https://beyond-roots.netlify.app/" style="color: #0f0f0f; text-decoration: underline; text-underline-offset: 3px;">Roots</a>
+                </div>
+            </div>
+            <a class="nav-item" href="#" id="nav-contact">Contact</a>
+        </nav>
+    </div>
+
+    <!-- ─── Hero Section ─────────────────────────────── -->
+    <section id="hero" class="section">
+        <p id="hero-subtitle">Mansanpally, 2027</p>
+        <span class="title-word" id="hw-1">ROOTS</span>
+        <span class="title-word" id="hw-2"> </span>
+        
+        <p class="hero-desc-line" id="hd-1">A Sustainable Villa Community</p>
+        <p class="hero-desc-line" id="hd-2"><strong>Expanding the landscape of modern living</strong></p>
+        <div id="hero-line"></div>
+    </section>
+
+    <!-- ─── Section Two ─────────────────────────────── -->
+    <section id="section-two">
+        <div id="s2-content">
+            <div id="s2-inner">
+                <div class="s2-item">
+                    <h3 class="s2-heading">Proximity Privilege</h3>
+                    <p class="s2-body">Just 1 km from the 300-ft-wide Greenfield Road, connecting ORR Exit 15 to the RRR, these villa residences offer seamless connectivity and exceptional appreciation potential.</p>
+                    <div class="s2-tether-line"></div>
+                </div>
+                <div class="s2-item">
+                    <h3 class="s2-heading">Future-Proof Design</h3>
+                    <p class="s2-body">Rooftop Solar, EV Charging, Rainwater Recharge Pits, Smart Water Systems, Thermal-Efficient Construction.</p>
+                    <div class="s2-tether-line"></div>
+                </div>
+                <div class="s2-item">
+                    <h3 class="s2-heading">Community Temple</h3>
+                    <p class="s2-body">Built across 1,000 sq. yds. offering a sanctuary for the peace of mind, body, and soul.</p>
+                    <div class="s2-tether-line"></div>
+                </div>
+                <div class="s2-item">
+                    <h3 class="s2-heading">Goushala</h3>
+                    <p class="s2-body">An eco-integrated space within the premises that supports biogas generation and organic manure production, bringing traditional practices into a modern, sustainable ecosystem.</p>
+                    <div class="s2-tether-line"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Section Three ─────────────────────────────── -->
+    <section id="section-three">
+
+        <div id="s3-left">
+            <h2 id="s3-heading">Generously sized villa<br>residences for modern living</h2>
+
+            <div id="s3-stats">
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">Size</span>
+                    <span class="s3-stat-value">2400 to<br>4200 sq.ft.</span>
+                </div>
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">Ceiling Ht.</span>
+                    <span class="s3-stat-value">12 ft</span>
+                </div>
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">Energy</span>
+                    <span class="s3-stat-value">Solar-Ready</span>
+                </div>
+                <div class="s3-stat-col">
+                    <span class="s3-stat-label">EV Charging</span>
+                    <span class="s3-stat-value">Pre-wired</span>
+                </div>
+            </div>
+
+            <div id="s3-accordion">
+                <div class="s3-acc-item">
+                    <span class="s3-acc-label">Layout</span>
+                </div>
+                <div class="s3-acc-item">
+                    <span class="s3-acc-label">Materials</span>
+                </div>
+                <div class="s3-acc-item">
+                    <span class="s3-acc-label">Surroundings</span>
+                </div>
+            </div>
+
+            <p id="s3-footer-text">At Roots, every detail is considered to engage the five senses, creating a home that is experienced, not simply inhabited.</p>
+        </div>
+
+        <div id="s3-right"></div>
+
+    </section>
+
+    <!-- ─── Section Four ─────────────────────────────── -->
+    <section id="section-four">
+
+        <div id="s4-line-top"></div>
+
+        <div id="s4-accordion">
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Clubhouse</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">40,000+ sq.&thinsp;ft. dedicated to leisure,<br>laughter, and community building.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">SQ. FT.</span><span class="s4-stat-value">40,000+</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">FUNCTION</span><span class="s4-stat-value">Leisure</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Sports & Recreation</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">From daily fitness to walks with your pets,<br>there's room for every routine.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">SPACES</span><span class="s4-stat-value">Multiple</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">USE</span><span class="s4-stat-value">Daily</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Spiritual Zone</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">Intentionally designed meditation spaces<br>for moments of pause.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">DESIGN</span><span class="s4-stat-value">Intentional</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">OPEN</span><span class="s4-stat-value">Daily</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s4-item">
+                <div class="s4-item-label-wrap"><span class="s4-item-label">Premium Aesthetics</span></div>
+                <div class="s4-item-grey"></div>
+                <div class="s4-item-right">
+                    <p class="s4-item-desc">Lush greenery, calming water features,<br>and seating amidst nature.</p>
+                    <div class="s4-item-stats">
+                        <div class="s4-stat-col"><span class="s4-stat-label">GREENERY</span><span class="s4-stat-value">Curated</span></div>
+                        <div class="s4-stat-col"><span class="s4-stat-label">WATER</span><span class="s4-stat-value">Features</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ─── Section Six ──────────────────────────────── -->
+    <section id="section-six">
+        <div id="s6-heading">Life in Full Bloom</div>
+        <div id="s6-map-wrap">
+            <canvas id="s6-map"></canvas>
+
+            <div class="map-pin" style="left: 20%; top: 33%">
+                <div class="map-pin-card">
+                    <div class="map-pin-label">Open Space</div>
+                    <div class="map-pin-title">The Grove</div>
+                    <ul class="map-pin-features">
+                        <li>Native landscaping</li>
+                        <li>Walking trails</li>
+                        <li>Children's play area</li>
+                    </ul>
+                </div>
+                <div class="map-dot"></div>
+            </div>
+
+            <div class="map-pin" style="left: 45%; top: 41%">
+                <div class="map-pin-card">
+                    <div class="map-pin-label">Connectivity</div>
+                    <div class="map-pin-title">Greenfield Road</div>
+                    <ul class="map-pin-features">
+                        <li>300-ft wide boulevard</li>
+                        <li>1 km from ORR Exit 15</li>
+                        <li>RRR access</li>
+                    </ul>
+                </div>
+                <div class="map-dot"></div>
+            </div>
+
+            <div class="map-pin" style="left: 64%; top: 54%">
+                <div class="map-pin-card">
+                    <div class="map-pin-label">Community</div>
+                    <div class="map-pin-title">Temple &amp; Goushala</div>
+                    <ul class="map-pin-features">
+                        <li>1,000 sq.yd. sanctuary</li>
+                        <li>Biogas facility</li>
+                        <li>Organic manure</li>
+                    </ul>
+                </div>
+                <div class="map-dot"></div>
+            </div>
+        </div>
+        <p id="s6-body">Living amidst nature shouldn't come at the cost of modernity. Where the two intersect begins the discovery of all that life can be beyond four walls.</p>
+    </section>
+
+    <!-- ─── Section Five ─────────────────────────────── -->
+    <section id="section-five">
+        <div id="s5-box"></div>
+        <div id="s5-label">| Sustainability |</div>
+        <div id="s5-title-top">Green, Beyond</div>
+        <div id="s5-title-bottom">Just a Colour</div>
+        <p id="s5-body">Our Roots villa community in Mansanpally, Maheshwaram, is designed to respond responsibly to the land it inhabits, while intelligently integrating modern amenities.</p>
+    </section>
+
+    <!-- ─── Section Seven — Contact + Footer ───────────────────────── -->
+    <section id="section-seven">
+
+        <div id="s7-contact">
+            <div class="ct-left">
+                <h2 class="ct-title">A thoughtful choice<br>deserves a thoughtful<br>conversation.</h2>
+                <p class="ct-sub">Leave your details and our Customer<br>Delight Manager will take it from here.</p>
+            </div>
+            <form class="ct-form" onsubmit="return false">
+                <div class="ct-field">
+                    <label class="ct-label" for="ct-name">NAME:</label>
+                    <div class="ct-input-wrap">
+                        <input class="ct-input" id="ct-name" name="name" autocomplete="name">
+                    </div>
+                </div>
+                <div class="ct-field">
+                    <label class="ct-label" for="ct-email">EMAIL:</label>
+                    <div class="ct-input-wrap">
+                        <input class="ct-input" id="ct-email" name="email" type="email" autocomplete="email">
+                        <span class="ct-help">This will help us get in touch with you</span>
+                    </div>
+                </div>
+                <div class="ct-field">
+                    <label class="ct-label" for="ct-note">NOTE:</label>
+                    <div class="ct-input-wrap">
+                        <input class="ct-input" id="ct-note" name="note">
+                        <span class="ct-help">What would you like to discuss?</span>
+                    </div>
+                </div>
+                <button type="submit" class="ct-submit">Submit</button>
+            </form>
+        </div>
+
+        <div id="s7-footer">
+            <div class="ft-layer ft-base">
+                <nav class="ft-nav" aria-hidden="true">
+                    <span style="left:121.5px; top:113.6px">WORK</span><span style="left:243px; top:113.6px">JOURNAL</span>
+                    <span style="left:121.5px; top:145.6px">TEAM</span><span style="left:243.5px; top:145.6px">ABOUT US</span>
+                    <span style="left:122.5px; top:181.1px">CONTACT</span><span style="left:243.5px; top:181.1px">CAREER</span>
+                </nav>
+                <span class="ft-bar"></span>
+                <p class="ft-q"><b>What if your next-door neighbour was 50 years old?</b></p>
+                <p class="ft-body">A 50-year-old peepal tree, carefully transplanted to put down<br>roots alongside you.</p>
+                <h2 class="ft-head">Towards<br>Thought-Led<br>Development</h2>
+            </div>
+            <div class="ft-layer ft-dark">
+                <nav class="ft-nav">
+                    <a href="#" style="left:121.5px; top:113.6px">WORK</a><a href="#" style="left:243px; top:113.6px">JOURNAL</a>
+                    <a href="#" style="left:121.5px; top:145.6px">TEAM</a><a href="#" style="left:243.5px; top:145.6px">ABOUT US</a>
+                    <a href="#" style="left:122.5px; top:181.1px">CONTACT</a><a href="#" style="left:243.5px; top:181.1px">CAREER</a>
+                </nav>
+                <span class="ft-bar"></span>
+                <p class="ft-q"><b>What if your next-door neighbour was 50 years old?</b></p>
+                <p class="ft-body">A 50-year-old peepal tree, carefully transplanted to put down<br>roots alongside you.</p>
+            </div>
+        </div>
+
+    </section>
+
+    <script src="../../shared/inject-header.js"></script>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="site.js"></script>
+</body>
+</html>

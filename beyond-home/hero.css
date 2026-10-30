@@ -1,0 +1,210 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #ffffff;
+  font-family: "PartnerSerif", Georgia, 'Times New Roman', serif;
+  overflow-x: hidden;
+}
+
+/* --- HEADER ---
+   The old #site-header (beyond.png + 54px canvas) is replaced by the shared
+   .menu in styles.css. #header-canvas now sits in the menu's icon slot. */
+
+#header-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #efefef;          /* slot colour fades in together with the house */
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+/* --- HERO SEQUENCE --- */
+
+.hero-sequence {
+  height: 2200vh;
+}
+
+.hero-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 2; /* above fixed canvas */
+  pointer-events: none; /* pass clicks through to the fixed canvas beneath */
+}
+
+#hero-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+/* --- HERO TAGLINE --- */
+
+#hero-tagline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+#hero-tagline span {
+  position: absolute;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #333;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+#tagline-left {
+  left: 35%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#tagline-right {
+  right: 33%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#tagline-bottom {
+  left: 50%;
+  top: 67%;
+  transform: translateX(-50%);
+}
+
+/* --- SCROLL TEXT --- */
+
+#hero-text-scroll {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 440px;
+  text-align: center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+#hero-text-scroll p {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 32px;
+}
+
+#hero-text-scroll p:last-child {
+  margin-bottom: 0;
+}
+
+/* --- WALL OVERLAYS --- */
+
+#wall-overlays {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.wall-overlay {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  background-color: #878585;
+  padding: 8px 12px;
+}
+
+.wall-overlay::before {
+  content: '';
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #878585;
+}
+
+.wall-overlay.visible {
+  pointer-events: all;
+}
+
+.overlay-label {
+  display: block;
+  font-size: 24px;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: #fff;
+  text-align: left;
+}
+
+.overlay-body {
+  margin-top: 6px;
+  margin-left: -12px;
+  margin-right: -12px;
+  margin-bottom: -8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #000;
+  background-color: #dcdcdc;
+  text-align: left;
+}
+
+/* --- ABOUT SECTION --- */
+
+#about-section {
+  height: 600vh;
+  position: relative;
+  z-index: 2; /* above fixed canvas so text added later shows on top */
+}
+
+.about-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  pointer-events: none;
+}
+
+/* --- TEXT REPEL (text-repel.js) ---
+   Source paragraphs stay in the DOM for screen readers; once the repel layout
+   is ready they are visually hidden and replaced by positioned line halves. */
+
+#hero-text-scroll.is-repel .repel-source {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.repel-line {
+  position: absolute;
+  left: 0;
+  height: 27.2px;
+  font-size: 16px;
+  line-height: 27.2px;
+  color: #333;
+  white-space: nowrap;
+}
+
+.repel-line span {
+  position: absolute;
+  top: 0;
+  will-change: transform;
+}

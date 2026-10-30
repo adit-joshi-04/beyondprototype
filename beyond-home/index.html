@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beyond Concrete — Option 2</title>
+  <!-- Shared fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="hero.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- 3D canvas — fixed fullscreen, behind scrolls 1–4 (paused once scroll 5 covers it) -->
+  <canvas id="hero-canvas"></canvas>
+
+  <!-- Skip intro — visible only on first frame, fades on scroll -->
+  <p class="skip-intro" id="skip-intro">Keep scrolling for the full experience or <a class="skip-intro__link" href="#splitPin">skip</a></p>
+
+  <main>
+    <!-- ============ SCROLLS 1–4: 3D HERO + ABOUT (first half) ============ -->
+    <!-- HERO — 3D house explode sequence -->
+    <div class="hero-sequence" id="hero-sequence">
+      <div class="hero-sticky">
+
+        <!-- tagline text around assembled house -->
+        <div id="hero-tagline">
+          <span id="tagline-left">TOWARDS</span>
+          <span id="tagline-right">THOUGHT-LED</span>
+          <span id="tagline-bottom">DEVELOPMENT</span>
+        </div>
+
+        <!-- scroll-driven text — translates up through viewport -->
+        <div id="hero-text-scroll">
+          <!-- source copy: read by screen readers and by text-repel.js; lines are re-drawn around the house -->
+          <div class="repel-source">
+          <p>You build a home.</p>
+          <p>That home belongs to<br>a neighbourhood,<br>a city,<br>a country.</p>
+          <p>So where does a home really end?</p>
+          <p>Perhaps it doesn't.</p>
+          <p>Because the air beyond your window is part of your home.<br>The soil beneath.<br>The trees outside.<br>Are all a part of your home.</p>
+          <p>And that is why, to us, building a home means looking beyond the walls.</p>
+          <p>Beyond concrete.</p>
+          </div>
+        </div>
+
+        <div id="wall-overlays">
+          <div class="wall-overlay" id="overlay-front">
+            <span class="overlay-label">Architecture</span>
+            <p class="overlay-body">The way a building understands orientation, proportion, views, and ventilation.</p>
+          </div>
+          <div class="wall-overlay" id="overlay-right">
+            <span class="overlay-label">Engineering</span>
+            <p class="overlay-body">The things you don't notice because they've been engineered so well.</p>
+          </div>
+          <div class="wall-overlay" id="overlay-left">
+            <span class="overlay-label">Biodiversity</span>
+            <p class="overlay-body">An environment where nature and people thrive together.</p>
+          </div>
+          <div class="wall-overlay" id="overlay-back">
+            <span class="overlay-label">Sustainability</span>
+            <p class="overlay-body">Systems designed to use less, conserve more and give back where they can.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ABOUT — active wall expands to fill screen -->
+    <section id="about-section">
+      <div class="about-sticky">
+        <!-- text content added later -->
+      </div>
+    </section>
+
+    <!-- ============ SPLIT PROJECT NAVIGATOR ============ -->
+    <!-- split-pin is a scroll spacer only; .split lives outside it so it is
+         in the root stacking context (not trapped inside split-pin's context) -->
+    <div class="split-pin" id="splitPin"></div>
+    <section class="split" id="split" style="--sp-x: 50vw">
+      <div class="sp-panel sp-left" data-side="left">
+        <h2 class="sp-fifth">FIFTH<br>AVENUE</h2>
+        <p class="sp-floors">45 Residential Floors.<br><b>An Architectural<br>Marvel.</b></p>
+        <a class="sp-explore sp-explore-left" href="#">Explore Project
+          <svg width="96" height="8" viewBox="0 0 96 8" aria-hidden="true"><path d="M0 4H95M91 1l4 3-4 3" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+        </a>
+      </div>
+      <div class="sp-panel sp-right" data-side="right">
+        <div class="sp-right-shift">
+          <p class="sp-villa">A sustainable villa<br>community <b>rooted in<br>the future.</b></p>
+          <h2 class="sp-roots">ROOTS</h2>
+        </div>
+        <a class="sp-explore sp-explore-right" href="#">Explore Project
+          <svg width="96" height="8" viewBox="0 0 96 8" aria-hidden="true"><path d="M0 4H95M91 1l4 3-4 3" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+        </a>
+        <p class="sp-status"><span class="sp-dot"></span>150 days until completion</p>
+      </div>
+      <span class="sp-divider" aria-hidden="true"></span>
+      <span class="sp-frame" aria-hidden="true"></span>
+    </section>
+
+    <!-- ============ SCROLL 6: ONE/ONE BY NATURE ============ -->
+    <section class="s6" id="s6">
+      <div class="glow" id="glow" aria-hidden="true"></div>
+      <div class="stage">
+        <header class="s6__title">
+          <h2 class="s6__big">ONE/ONE</h2>
+          <p class="s6__sub">BY NATURE</p>
+        </header>
+        <!-- Note changes with the hovered card; hidden when nothing is hovered -->
+        <p class="s6__note" data-note="0">
+          <span class="s6__diamond" aria-hidden="true"></span>
+          Harnessing the sun, from first light to last. Partnering<br>with the leading solar companies like Tata Power Solar
+        </p>
+        <p class="s6__note" data-note="1">
+          <span class="s6__diamond" aria-hidden="true"></span>
+          Every square foot planned with intent. Compact footprints<br>that open into generous, light-filled living
+        </p>
+        <p class="s6__note" data-note="2">
+          <span class="s6__diamond" aria-hidden="true"></span>
+          Designed around local wind, shade and rainfall, so homes<br>stay naturally cool through every season
+        </p>
+        <p class="s6__note" data-note="3">
+          <span class="s6__diamond" aria-hidden="true"></span>
+          Water recycling, smart metering and efficient systems<br>that quietly cut everyday energy and running costs
+        </p>
+
+        <!-- 4 perspective images. Add style="--img:url(...)" on .card__img to drop real images in -->
+        <div class="card" data-i="0" data-tilt="a">
+          <div class="card__img"></div><div class="card__hit"></div>
+          <span class="card__label">SUNSET TO SUNRISE</span>
+        </div>
+        <div class="card" data-i="1" data-tilt="b">
+          <div class="card__img"></div><div class="card__hit"></div>
+          <span class="card__label">INFINITY IN THE FINITE</span>
+        </div>
+        <div class="card" data-i="2" data-tilt="a">
+          <div class="card__img"></div><div class="card__hit"></div>
+          <span class="card__label">ONE WITH THE CLIMATE</span>
+        </div>
+        <div class="card" data-i="3" data-tilt="b">
+          <div class="card__img"></div><div class="card__hit"></div>
+          <span class="card__label">POWERED BY EFFICIENCY</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCROLL 7: PODCAST ============ -->
+    <section class="s7" id="s7">
+      <div class="s7__copy">
+        <h2 class="s7__heading">And what makes<br><span class="s7__heading-br"> </span>us one of one?</h2>
+        <p class="s7__episode"></p>
+        <p class="s7__body">One man with a vision for his city to develop responsibly, and<br>build better. Discover the philosophy behind it on our podcast.</p>
+      </div>
+      <div class="s7__fan">
+        <div class="s7__card" data-pos="-2" data-title="Concrete as a language of care." data-label="BEYOND CONCRETE × CLIMATE TALKS"></div>
+        <div class="s7__card" data-pos="-1" data-title="The city is our canvas." data-label="BEYOND CONCRETE × HYDERABAD LIVES"></div>
+        <div class="s7__card" data-pos="0"  data-title="Every building carries a responsibility." data-label="BEYOND CONCRETE × SWITCHEKO"></div>
+        <div class="s7__card" data-pos="1"  data-title="What does permanence mean?" data-label="BEYOND CONCRETE × ARAVIND REDDY"></div>
+        <div class="s7__card" data-pos="2"  data-title="Building with intention." data-label="BEYOND CONCRETE × STUDIO TALKS"></div>
+      </div>
+      <div class="s7__card-label"></div>
+    </section>
+
+  </main>
+
+  <script src="../shared/inject-header.js"></script>
+  <script src="../shared/inject-contact-footer.js"></script>
+  <script src="hero3d.js"></script>
+  <script src="hero-scroll.js"></script>
+  <script src="script.js"></script>
+  <script type="module" src="text-repel.js"></script>
+</body>
+</html>
