@@ -41,6 +41,12 @@
     window.location.href = root + '../projects page/fifth ave/index.html';
   });
 
+  const rightPanel = split.querySelector('.sp-right');
+  rightPanel.addEventListener('click', () => {
+    if (!split.classList.contains('hover-right')) return;
+    window.open('https://www.figma.com/proto/DgIo9C6IENF9SXZvtMEgWD/Beyond_client?node-id=1006-365&viewport=491%2C355%2C0.13&t=gxvaDkEmoB04h6VH-0&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=1006%3A365&show-proto-sidebar=1', '_blank');
+  });
+
   split.addEventListener('pointerleave', () => {
     split.classList.remove('hover-left', 'hover-right');
     resetX();
