@@ -18,7 +18,7 @@
     const _pillars   = _root + '/about prototype/index.html';
     const _fifthAve  = _root + '/projects page/fifth ave/index.html';
     // const _roots     = _root + '/projects page/roots/index.html';
-    const _roots     = '';
+    const _roots     = 'https://www.figma.com/proto/DgIo9C6IENF9SXZvtMEgWD/Beyond_client?node-id=1006-365&viewport=491%2C355%2C0.13&t=gxvaDkEmoB04h6VH-0&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=1006%3A365&show-proto-sidebar=1';
 
     document.body.insertAdjacentHTML('afterbegin', `
 <style>
@@ -172,9 +172,12 @@
     .nav-workroom {
         font-family: 'PartnerSerif', serif;
         font-size: 16px;
-        color: #aaa;
+        color: #0f0f0f;
         white-space: nowrap;
+        text-decoration: none;
     }
+
+    .nav-workroom:hover { opacity: 0.5; }
 
     /* ── Overlay ──────────────────────────────────────────────────────────── */
     #nav-overlay {
@@ -219,16 +222,16 @@
                 <span>Projects</span>
                 <div class="nav-sub">
                     <a href="${_fifthAve}">Fifth Avenue</a>
-                    <span>Roots</span>
+                    <a href="${_roots}">Roots</a>
                 </div>
             </div>
             <div class="nav-col">
-                <a href="#" class="nav-connect">Connect</a>
+                <span class="nav-connect" style="color: #aaa">Connect</span>
             </div>
         </div>
         <div class="header-nav-footer">
             <p class="nav-tagline">What if your next-door neighbour was 50 years old? A 50-year-old peepal tree, carefully transplanted to put down roots alongside you.</p>
-            <span class="nav-workroom">Work room</span>
+            <a href="https://www.figma.com/proto/DgIo9C6IENF9SXZvtMEgWD/Beyond_client?node-id=1006-3&viewport=379%2C283%2C0.09&t=DCtcm4ss1428qklh-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=1006%3A3&show-proto-sidebar=1&page-id=0%3A1" class="nav-workroom">Work room</a>
         </div>
     </nav>
 </header>
@@ -256,18 +259,18 @@
     overlay.addEventListener('click', closeMenu);
 
     // ── Connect — scroll to footer on current page ─────────────────────────
-    header.querySelector('.nav-connect').addEventListener('click', (e) => {
-        e.preventDefault();
-        closeMenu();
-        // scrollState-based pages (fifth ave, roots) expose window.scrollState
-        if (window.scrollState && window.scrollState.jumpTo) {
-            window.scrollState.jumpTo(window.scrollState.POST_TOTAL);
-            return;
-        }
-        // fallback: reveal section-seven if it exists
-        const s7 = document.getElementById('section-seven');
-        if (s7) s7.scrollIntoView({ behavior: 'smooth' });
-    });
+    // header.querySelector('.nav-connect').addEventListener('click', (e) => {
+    //     e.preventDefault();
+    //     closeMenu();
+    //     // scrollState-based pages (fifth ave, roots) expose window.scrollState
+    //     if (window.scrollState && window.scrollState.jumpTo) {
+    //         window.scrollState.jumpTo(window.scrollState.POST_TOTAL);
+    //         return;
+    //     }
+    //     // fallback: reveal section-seven if it exists
+    //     const s7 = document.getElementById('section-seven');
+    //     if (s7) s7.scrollIntoView({ behavior: 'smooth' });
+    // });
 
     document.dispatchEvent(new CustomEvent('headerReady'));
 })();

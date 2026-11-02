@@ -437,16 +437,16 @@
                 <div class="ft-nav-col">
                     <a href="../beyond-home/">HOME</a>
                     <a href="../about prototype/">OUR PILLARS</a>
-                    <a href="#">CONNECT</a>
+                    <span style="color: #aaa">CONNECT</span>
                     <p class="ft-email">HELLO@BEYONDCONCRETE.IN</p>
                 </div>
                 <div class="ft-nav-col">
-                    <span>WORK ROOM</span>
+                    <a href="https://www.figma.com/proto/DgIo9C6IENF9SXZvtMEgWD/Beyond_client?node-id=1006-3&viewport=379%2C283%2C0.09&t=DCtcm4ss1428qklh-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=1006%3A3&show-proto-sidebar=1&page-id=0%3A1">WORK ROOM</a>
                     <div class="ft-projects">
                         <span>PROJECTS</span>
                         <div class="ft-nav-sub">
                             <a href="../projects page/fifth ave/">Fifth Avenue</a>
-                            <span>Roots</span>
+                            <a href="https://www.figma.com/proto/DgIo9C6IENF9SXZvtMEgWD/Beyond_client?node-id=1006-365&viewport=491%2C355%2C0.13&t=gxvaDkEmoB04h6VH-0&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=1006%3A365&show-proto-sidebar=1">Roots</a>
                         </div>
                     </div>
                     <div class="ft-social">
