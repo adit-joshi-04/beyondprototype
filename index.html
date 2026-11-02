@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="refresh" content="0;url=/beyond-home">
-<script>window.location.replace('/beyond-home');</script>
+<script>
+  if (/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    window.location.replace('https://www.figma.com/proto/DgIo9C6IENF9SXZvtMEgWD/Beyond_client?node-id=1006-380&viewport=-5427%2C-263%2C0.97&t=gxvaDkEmoB04h6VH-0&scaling=scale-down&content-scaling=fixed&starting-point-node-id=1006%3A380&show-proto-sidebar=1');
+  } else {
+    window.location.replace('/beyond-home');
+  }
+</script>
 </head>
 </html>
