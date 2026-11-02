@@ -209,8 +209,8 @@ a { color: inherit; }
   transition: opacity 0.4s ease, transform 0.4s var(--ease);
 }
 .sp-explore svg { flex: none; margin-top: calc(1 * var(--u)); }
-.sp-explore-left  { right: calc(230 * var(--u)); bottom: calc(40 * var(--u)); }
-.sp-explore-right { left: calc(189 * var(--u));  top: calc(138 * var(--u)); }
+.sp-explore-left  { left: calc(44 * var(--u));  top: calc(400 * var(--u)); }
+.sp-explore-right { right: calc(43 * var(--u)); bottom: calc(168 * var(--u)); }
 .sp-explore:hover svg { transform: translateX(calc(6 * var(--u))); }
 .sp-explore svg { transition: transform 0.4s var(--ease); }
 
